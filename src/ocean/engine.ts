@@ -1,8 +1,9 @@
-import { IMAGES } from "../assets/images";
+import { IMAGES, getBiomeImageSources } from "../assets/images";
 import { BIOMES } from "../data/biomes";
 import { SPECIES } from "../data/species";
 import type { BiomeId, ShapeId, TimeOfDay } from "../types";
 import { getSpriteCanvas } from "./sprites";
+import { perfMonitor } from "../perf/monitor";
 
 export interface OceanConfig {
   biome: BiomeId;
@@ -126,6 +127,7 @@ export class OceanEngine {
   private reduced = false;
   private bgCanvas: HTMLCanvasElement | null = null;
   private hidden = false;
+  private loadingImages = false;
 
   constructor(canvas: HTMLCanvasElement, config: OceanConfig) {
     this.canvas = canvas;
@@ -142,19 +144,31 @@ export class OceanEngine {
   async init() {
     this.rebuild();
     this.start();
-    const srcs = Object.values(IMAGES);
-    await Promise.all(
-      srcs.map(async (src) => {
-        if (imageCache.has(src)) return;
-        try {
-          const img = await loadImage(src);
-          imageCache.set(src, img);
-        } catch {
-          /* gradient fallback */
-        }
-      }),
-    );
-    this.rebuild();
+    await this.ensureBiomeImages();
+  }
+
+  private async ensureBiomeImages() {
+    if (this.loadingImages) return;
+    const needed = getBiomeImageSources(this.config.biome, this.config.timeOfDay);
+    const toLoad = needed.filter((src) => !imageCache.has(src));
+    if (toLoad.length === 0) return;
+
+    this.loadingImages = true;
+    try {
+      await Promise.all(
+        toLoad.map(async (src) => {
+          try {
+            const img = await loadImage(src);
+            imageCache.set(src, img);
+          } catch {
+            /* gradient fallback */
+          }
+        }),
+      );
+    } finally {
+      this.loadingImages = false;
+    }
+    this.composeBackground();
   }
 
   setConfig(partial: Partial<OceanConfig>) {
@@ -163,6 +177,9 @@ export class OceanEngine {
     const lifeChanged = Math.abs(next.life - this.config.life) > 0.5;
     const todChanged = next.timeOfDay !== this.config.timeOfDay;
     this.config = next;
+    if (biomeChanged || todChanged) {
+      void this.ensureBiomeImages();
+    }
     if (biomeChanged || lifeChanged || todChanged) this.rebuild();
     else if (!this.bgCanvas) this.composeBackground();
   }
@@ -178,11 +195,22 @@ export class OceanEngine {
     if (this.running) return;
     this.running = true;
     this.last = performance.now();
+    let accumulatedMs = 0;
+
     const loop = (now: number) => {
       if (!this.running) return;
-      const dt = Math.min(0.05, (now - this.last) / 1000);
+      const targetFps = perfMonitor.getTargetFps();
+      const frameInterval = 1000 / targetFps;
+
+      const rawDt = (now - this.last) / 1000;
       this.last = now;
-      if (!this.hidden) this.tick(dt);
+      accumulatedMs += rawDt * 1000;
+
+      if (!this.hidden && accumulatedMs >= frameInterval * 0.85) {
+        const dt = Math.min(0.05, accumulatedMs / 1000);
+        accumulatedMs = 0;
+        this.tick(dt, now);
+      }
       this.raf = requestAnimationFrame(loop);
     };
     this.raf = requestAnimationFrame(loop);
