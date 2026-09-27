@@ -43,17 +43,18 @@ export function Focus() {
   const planned = session?.plannedSeconds ?? null;
   const elapsed = session ? elapsedSeconds(session, now) : 0;
   const remaining = planned === null ? null : Math.max(0, planned - elapsed);
+  const biome = session ? BIOMES[session.biome] : null;
 
   useEffect(() => {
     void requestNotificationPermission();
   }, []);
 
   useEffect(() => {
-    if (!session || planned === null || remaining !== 0 || doneRef.current) return;
+    if (!session || !biome || planned === null || remaining !== 0 || doneRef.current) return;
     doneRef.current = true;
     notifySessionComplete(biome.name, Math.round((planned ?? elapsed) / 60));
     completeSession();
-  }, [session, planned, remaining, completeSession, biome.name, elapsed]);
+  }, [session, planned, remaining, completeSession, biome, elapsed]);
 
   useEffect(() => {
     document.title = session
@@ -64,9 +65,8 @@ export function Focus() {
     };
   }, [session, elapsed, remaining]);
 
-  if (!session) return null;
+  if (!session || !biome) return null;
 
-  const biome = BIOMES[session.biome];
   const canEarn = elapsedSeconds(session, Date.now()) >= MIN_REWARD_SECONDS;
   const end = () => {
     if (elapsedSeconds(session, Date.now()) >= MIN_REWARD_SECONDS) completeSession();

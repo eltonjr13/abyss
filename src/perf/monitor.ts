@@ -169,7 +169,7 @@ class PerformanceMonitor {
 
   private scheduleNotify() {
     if (this.notifyTimer !== null) return;
-    this.notifyTimer = window.setTimeout(() => {
+    this.notifyTimer = setTimeout(() => {
       this.notifyTimer = null;
       if (this.listeners.size === 0) return;
       const metrics = this.getMetrics();

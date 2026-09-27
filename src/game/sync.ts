@@ -1,4 +1,4 @@
-import type { GameState } from "../types";
+import type { GameState, PlusEntitlement } from "../types";
 import { BIOME_ORDER } from "../data/biomes";
 import { SPECIES } from "../data/species";
 import { clamp } from "../lib/format";
@@ -105,7 +105,7 @@ export function mergeGameStates(local: GameState, remote: GameState): GameState 
 
   // Preserva o status do Plus Vitalício se estiver ativo em qualquer um dos dispositivos
   const isPlus = Boolean(local.plus?.isPlus || remote.plus?.isPlus);
-  const plus = isPlus
+  const plus: PlusEntitlement = isPlus
     ? (local.plus?.isPlus ? local.plus : remote.plus) || {
         isPlus: true,
         unlockedAt: new Date().toISOString(),

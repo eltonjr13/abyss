@@ -9,8 +9,11 @@ import abyss from "./optimized/abyss.jpg";
 import surface from "./optimized/surface.jpg";
 import map from "./optimized/map.jpg";
 import type { BiomeId, TimeOfDay } from "../../types";
+import { getBiomeImageKeys, type ImageKey } from "./keys";
 
-export const IMAGES = {
+export { getBiomeImageKeys, type ImageKey };
+
+export const IMAGES: Record<ImageKey, string> = {
   reefDead,
   reefAlive,
   reefNight,
@@ -28,18 +31,5 @@ export const IMAGES = {
  * Isso evita carregar todos os 18MB/assets de uma vez no boot, carregando estritamente sob demanda.
  */
 export function getBiomeImageSources(biome: BiomeId, timeOfDay: TimeOfDay): string[] {
-  if (biome === "reef") {
-    const list = [IMAGES.reefDead, IMAGES.reefAlive];
-    if (timeOfDay === "night") list.push(IMAGES.reefNight);
-    return list;
-  }
-  const biomeMap: Record<BiomeId, string> = {
-    reef: IMAGES.reefAlive,
-    kelp: IMAGES.kelp,
-    mangrove: IMAGES.mangrove,
-    island: IMAGES.island,
-    deep: IMAGES.deep,
-    abyss: IMAGES.abyss,
-  };
-  return [biomeMap[biome]];
+  return getBiomeImageKeys(biome, timeOfDay).map((key) => IMAGES[key]);
 }

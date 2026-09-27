@@ -7,21 +7,21 @@ import type { GameState } from "../src/types.js";
 test("exportSaveToJson and exportSaveToCode serialize correctly and parse without data loss", () => {
   const initial = freshState();
   initial.xp = 120;
-  initial.discovered = ["coral_polyp", "anemone_clown"];
+  initial.discovered = ["peixe-palhaco", "donzela-azul"];
   initial.biomeLife.reef = 35;
 
   const json = exportSaveToJson(initial);
   const parsedFromJson = parseSavePayload(json);
   assert.ok(parsedFromJson !== null);
   assert.equal(parsedFromJson?.xp, 120);
-  assert.deepEqual(parsedFromJson?.discovered, ["coral_polyp", "anemone_clown"]);
+  assert.deepEqual(parsedFromJson?.discovered, ["peixe-palhaco", "donzela-azul"]);
   assert.equal(parsedFromJson?.biomeLife.reef, 35);
 
   const code = exportSaveToCode(initial);
   const parsedFromCode = parseSavePayload(code);
   assert.ok(parsedFromCode !== null);
   assert.equal(parsedFromCode?.xp, 120);
-  assert.deepEqual(parsedFromCode?.discovered, ["coral_polyp", "anemone_clown"]);
+  assert.deepEqual(parsedFromCode?.discovered, ["peixe-palhaco", "donzela-azul"]);
 });
 
 test("mergeGameStates preserves the maximum XP, union of discovered species, and best biome life", () => {
@@ -29,7 +29,7 @@ test("mergeGameStates preserves the maximum XP, union of discovered species, and
     ...freshState(),
     xp: 250,
     totalFocusSeconds: 3600,
-    discovered: ["coral_polyp", "clownfish"],
+    discovered: ["peixe-palhaco", "donzela-azul"],
     unlockedBiomes: ["reef", "kelp"],
     biomeLife: { reef: 40, kelp: 15, mangrove: 0, island: 0, deep: 0, abyss: 0 },
     streak: 3,
@@ -39,7 +39,7 @@ test("mergeGameStates preserves the maximum XP, union of discovered species, and
     ...freshState(),
     xp: 400,
     totalFocusSeconds: 5400,
-    discovered: ["clownfish", "giant_kelp", "sea_otter"],
+    discovered: ["donzela-azul", "coral-cerebro", "peixe-anjo"],
     unlockedBiomes: ["reef", "kelp", "mangrove"],
     biomeLife: { reef: 20, kelp: 60, mangrove: 25, island: 0, deep: 0, abyss: 0 },
     streak: 5,
@@ -63,8 +63,8 @@ test("mergeGameStates preserves the maximum XP, union of discovered species, and
   assert.equal(merged.biomeLife.mangrove, 25);
 
   // Deve conter a união de todas as espécies sem duplicatas
-  assert.ok(merged.discovered.includes("coral_polyp"));
-  assert.ok(merged.discovered.includes("clownfish"));
-  assert.ok(merged.discovered.includes("giant_kelp"));
-  assert.ok(merged.discovered.includes("sea_otter"));
+  assert.ok(merged.discovered.includes("peixe-palhaco"));
+  assert.ok(merged.discovered.includes("donzela-azul"));
+  assert.ok(merged.discovered.includes("coral-cerebro"));
+  assert.ok(merged.discovered.includes("peixe-anjo"));
 });
