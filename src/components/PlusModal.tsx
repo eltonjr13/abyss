@@ -1,205 +1,84 @@
-import { useState } from "react";
-import { useGame } from "../game/GameContext";
-import { getAudio } from "../audio/engine";
+import { createPortal } from "react-dom";
+
+const benefits = [
+  {
+    title: "Paisagens sonoras estendidas",
+    description: "Chuva suave e marulho de praia, com volume independente do áudio essencial.",
+  },
+  {
+    title: "Modo Santuário",
+    description: "O oceano em tela cheia, sem cronômetro nem controles durante a contemplação.",
+  },
+  {
+    title: "Mapa anual de foco",
+    description: "Histórico diário dos últimos 365 dias para enxergar sua constância.",
+  },
+];
 
 export function PlusModal({ onClose }: { onClose: () => void }) {
-  const { state, unlockPlus } = useGame();
-  const [loading, setLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
-
-  const isAlreadyPlus = state.plus?.isPlus;
-
-  const handlePurchase = () => {
-    setLoading(true);
-    setStatusMessage(null);
-    // Simulação determinística de compra vitalícia com fallback seguro para ambiente web/local
-    setTimeout(() => {
-      unlockPlus(`tide_lifetime_${Date.now()}`, "purchase");
-      getAudio().chime();
-      setLoading(false);
-      setStatusMessage("Parabéns! Você agora é um Patrono do Oceano com Acesso Vitalício.");
-    }, 600);
-  };
-
-  const handleRestore = () => {
-    setLoading(true);
-    setStatusMessage(null);
-    setTimeout(() => {
-      if (state.plus?.isPlus) {
-        setStatusMessage("Sua compra vitalícia já está ativa neste dispositivo.");
-      } else {
-        // Restaura compra caso tenha chave salva ou simula restauração
-        unlockPlus(`tide_restored_${Date.now()}`, "restore");
-        getAudio().chime();
-        setStatusMessage("Compra restaurada com sucesso! Bem-vindo de volta ao TIDE Plus.");
-      }
-      setLoading(false);
-    }, 500);
-  };
-
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="TIDE Plus - Oferta de Acesso Vitalício"
+      aria-labelledby="plus-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md"
     >
-      <div className="relative max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-xl border border-white/20 bg-[#07131d]/95 p-6 shadow-2xl text-[var(--foam)]">
-        {/* Botão Fechar */}
+      <div className="relative max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-xl border border-white/20 bg-[#07131d]/95 p-6 text-[var(--foam)] shadow-2xl">
         <button
           onClick={onClose}
-          aria-label="Fechar janela"
-          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 text-sm text-white/60 hover:border-white/40 hover:text-white"
+          aria-label="Fechar oferta Plus"
+          className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 text-white/70 hover:text-white"
         >
           ✕
         </button>
 
-        {/* Cabeçalho */}
-        <div className="text-center pt-2">
-          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-[var(--gold)]/40 bg-[var(--gold)]/10 text-[var(--gold)]">
-            ✦
-          </div>
-          <p className="mt-3 font-pixel text-[11px] tracking-[0.45em] text-[var(--gold)] uppercase">
-            TIDE PLUS
-          </p>
-          <h2 className="mt-1 font-serif text-2xl text-white italic">
-            Onde o silêncio se aprofunda
+        <header className="pr-8">
+          <p className="font-pixel text-[11px] tracking-[0.35em] text-[var(--gold)] uppercase">TIDE PLUS</p>
+          <h2 id="plus-title" className="mt-2 font-serif text-3xl text-white italic">
+            Mais espaço para mergulhar
           </h2>
-          <p className="mt-2 text-xs text-white/60 leading-relaxed max-w-md mx-auto">
-            Uma experiência contemplativa e sensorial ampliada para quem busca mergulhos ainda mais profundos.
+          <p className="mt-2 text-sm leading-relaxed text-white/65">
+            Extras para personalizar a experiência, sem limitar o caminho pelo oceano.
           </p>
-        </div>
+        </header>
 
-        {/* Compromisso Ético */}
-        <div className="mt-5 rounded-lg border border-emerald-400/25 bg-emerald-950/20 p-3 text-center">
-          <p className="text-[11px] font-medium tracking-wide text-emerald-300">
-            🌿 Nosso Compromisso Ético
+        <section className="mt-5 rounded-lg border border-emerald-400/25 bg-emerald-950/20 p-4">
+          <h3 className="text-xs font-medium text-emerald-300">O essencial continua grátis</h3>
+          <p className="mt-1 text-xs leading-relaxed text-white/75">
+            Sessões de foco, todos os 6 biomas e todas as descobertas de espécies.
           </p>
-          <p className="mt-1 text-[11px] text-white/70 leading-relaxed">
-            O cronômetro essencial, todos os 6 biomas e todas as espécies do códice são e sempre serão 100% gratuitos.
-          </p>
-        </div>
+        </section>
 
-        {/* Benefícios Concretos */}
-        <div className="mt-5 space-y-3">
-          <BenefitItem
-            icon="♫"
-            title="Paisagens Sonoras Estendidas"
-            desc="Mixer avançado com chuva suave na superfície, marulho de praia e batimentos binaurais de foco (Alpha 10Hz e Theta 6Hz)."
-          />
-          <BenefitItem
-            icon="✦"
-            title="Modo Santuário (Ambient Display)"
-            desc="Visualização em tela cheia sem botões ou contadores para transformar seu monitor ou tablet em uma janela viva do oceano."
-          />
-          <BenefitItem
-            icon="☵"
-            title="Métricas Profundas & Heatmap Anual"
-            desc="Mapa de constância estilo constelação com 365 dias de histórico e análise do seu ritmo circadiano de foco."
-          />
-          <BenefitItem
-            icon="🗎"
-            title="Caderno do Naturalista"
-            desc="Cartões poéticos e ilustrações em alta resolução de todas as criaturas marinhas descobertas para salvar como fundo de tela."
-          />
-        </div>
-
-        {/* Caixa de Oferta / Status */}
-        <div className="mt-6 rounded-lg border border-white/20 bg-white/5 p-4 text-center">
-          {isAlreadyPlus ? (
-            <div>
-              <span className="inline-block rounded-full bg-[var(--gold)]/20 px-3 py-1 text-[11px] font-medium text-[var(--gold)] tracking-wider uppercase">
-                ✦ Patrono do Oceano Ativo
+        <section aria-label="Benefícios do Plus" className="mt-5 space-y-2">
+          {benefits.map((benefit, index) => (
+            <div key={benefit.title} className="flex gap-3 rounded-lg border border-white/10 bg-white/5 p-3">
+              <span aria-hidden="true" className="font-pixel text-sm text-[var(--gold)]">
+                {String(index + 1).padStart(2, "0")}
               </span>
-              <p className="mt-2 font-serif text-sm text-white/90 italic">
-                Seu acesso vitalício ao TIDE Plus está desbloqueado para sempre neste dispositivo.
-              </p>
-              {state.plus.unlockedAt && (
-                <p className="mt-1 text-[10px] text-white/50">
-                  Desbloqueado em: {new Date(state.plus.unlockedAt).toLocaleDateString("pt-BR")}
-                </p>
-              )}
-            </div>
-          ) : (
-            <div>
-              <p className="text-[10px] tracking-[0.25em] text-white/60 uppercase">
-                Acesso Permanente · Compra Única
-              </p>
-              <div className="mt-1 flex items-baseline justify-center gap-1">
-                <span className="font-serif text-3xl font-light text-[var(--gold)]">R$ 29,90</span>
-                <span className="text-xs text-white/50">/ vitalício</span>
+              <div>
+                <h3 className="text-xs font-medium text-white/95">{benefit.title}</h3>
+                <p className="mt-1 text-[11px] leading-relaxed text-white/60">{benefit.description}</p>
               </div>
-              <p className="mt-1 text-[11px] text-white/60">
-                Sem assinaturas mensais · Sem renovações surpresa
-              </p>
             </div>
-          )}
+          ))}
+        </section>
+
+        <div className="mt-5 rounded-lg border border-[var(--gold)]/30 bg-[var(--gold)]/10 p-4 text-center">
+          <p className="text-xs font-medium text-[var(--gold)]">Compra única · acesso permanente</p>
+          <p className="mt-1 text-[11px] text-white/65">Sem assinatura. O preço será mostrado pela loja antes da compra.</p>
         </div>
 
-        {/* Mensagem de Feedback */}
-        {statusMessage && (
-          <div className="mt-3 rounded border border-emerald-400/40 bg-emerald-950/40 p-2.5 text-center text-xs text-emerald-300">
-            {statusMessage}
-          </div>
-        )}
-
-        {/* Botões de Ação */}
-        <div className="mt-5 space-y-2.5">
-          {!isAlreadyPlus ? (
-            <button
-              onClick={handlePurchase}
-              disabled={loading}
-              className="w-full rounded border border-[var(--gold)] bg-[var(--gold)]/20 py-3 text-center text-xs font-medium tracking-[0.2em] text-[var(--gold)] uppercase transition hover:bg-[var(--gold)]/30 disabled:opacity-50"
-            >
-              {loading ? "Processando..." : "Desbloquear TIDE Plus Vitalício"}
-            </button>
-          ) : (
-            <button
-              onClick={onClose}
-              className="w-full rounded border border-white/30 bg-white/10 py-3 text-center text-xs tracking-[0.2em] text-white uppercase hover:bg-white/20"
-            >
-              Concluir & Aproveitar
-            </button>
-          )}
-
-          <div className="flex items-center justify-between pt-2 text-[11px] text-white/50">
-            <button
-              onClick={handleRestore}
-              disabled={loading}
-              className="hover:text-white/80 underline underline-offset-4 disabled:opacity-50"
-            >
-              Restaurar compra anterior
-            </button>
-            <span>Garantia de acesso permanente</span>
-          </div>
-        </div>
-
-        <p className="mt-4 text-center text-[10px] text-white/40">
-          O TIDE é um projeto independente. Sua compra apoia diretamente a criação de novos sons e espécies marinhas.
+        <button disabled className="mt-4 min-h-12 w-full rounded border border-white/20 bg-white/5 px-3 text-xs font-medium text-white/55">
+          Compra disponível em breve
+        </button>
+        <p className="mt-3 text-center text-[11px] leading-relaxed text-white/55">
+          A compra e a restauração serão ativadas após a integração com as lojas.
         </p>
+        <button onClick={onClose} className="mt-3 w-full py-2 text-xs text-white/70 underline underline-offset-4 hover:text-white">
+          Continuar gratuitamente
+        </button>
       </div>
-    </div>
-  );
-}
-
-function BenefitItem({
-  icon,
-  title,
-  desc,
-}: {
-  icon: string;
-  title: string;
-  desc: string;
-}) {
-  return (
-    <div className="flex items-start gap-3 rounded-lg border border-white/10 bg-[#0b1b28]/60 p-3">
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/15 bg-white/5 text-xs text-[var(--foam)]">
-        {icon}
-      </div>
-      <div>
-        <p className="text-xs font-medium text-white/90">{title}</p>
-        <p className="mt-0.5 text-[11px] leading-relaxed text-white/60">{desc}</p>
-      </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

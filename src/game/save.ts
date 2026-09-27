@@ -236,6 +236,10 @@ export function hasPlus(state: GameState): boolean {
   return Boolean(state.plus?.isPlus);
 }
 
-export function canAccess(state: GameState, _feature: PlusFeatureId): boolean {
-  return hasPlus(state);
+export function canAccess(state: GameState, feature: PlusFeatureId): boolean {
+  return hasPlus(state) && (
+    feature === "soundscapes_extended" ||
+    feature === "sanctuary_mode" ||
+    feature === "deep_metrics"
+  );
 }

@@ -103,7 +103,7 @@ test("daily focus resets at midnight and a missed day expires the streak", () =>
   assert.equal(later.streak, 0);
 });
 
-test("TIDE Plus permanent purchase unlocks features, survives reload and reset, and can be restored", () => {
+test("local Plus state grants only specified extras and survives reload and reset", () => {
   const initial: GameData = { state: freshState(now), session: null, rewards: null };
   assert.equal(hasPlus(initial.state), false);
   assert.equal(canAccess(initial.state, "sanctuary_mode"), false);
@@ -116,6 +116,10 @@ test("TIDE Plus permanent purchase unlocks features, survives reload and reset, 
   });
   assert.equal(hasPlus(purchased.state), true);
   assert.equal(canAccess(purchased.state, "soundscapes_extended"), true);
+  assert.equal(canAccess(purchased.state, "sanctuary_mode"), true);
+  assert.equal(canAccess(purchased.state, "deep_metrics"), true);
+  assert.equal(canAccess(purchased.state, "tide_atmospheres"), false);
+  assert.equal(canAccess(purchased.state, "naturalist_cards"), false);
   assert.equal(purchased.state.plus.transactionId, "ord_vitalicio_999");
   assert.equal(purchased.state.plus.source, "purchase");
 

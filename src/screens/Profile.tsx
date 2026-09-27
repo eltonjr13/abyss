@@ -88,46 +88,18 @@ export function Profile() {
           {state.xp} XP · próximo {prog.next}
         </p>
 
-        {/* Status / Oferta TIDE Plus */}
-        <div className="mt-6">
-          {state.plus?.isPlus ? (
-            <div className="flex items-center justify-between rounded-lg border border-[var(--gold)]/35 bg-[var(--gold)]/10 p-3.5 backdrop-blur-xs">
-              <div className="flex items-center gap-2.5">
-                <span className="text-[var(--gold)] text-sm">✦</span>
-                <div>
-                  <p className="text-xs font-medium text-[var(--gold)] tracking-wide">
-                    Patrono do Oceano · Plus Vitalício
-                  </p>
-                  <p className="text-[10px] text-white/60">
-                    Sons binaurais e recursos avançados ativos
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowPlus(true)}
-                className="rounded border border-[var(--gold)]/40 px-2.5 py-1 text-[10px] uppercase tracking-wider text-[var(--gold)] hover:bg-[var(--gold)]/20"
-              >
-                Benefícios
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between rounded-lg border border-white/15 bg-gradient-to-r from-white/5 to-[var(--gold)]/10 p-3.5 backdrop-blur-xs">
-              <div>
-                <p className="text-xs font-medium text-white/95">
-                  ✦ TIDE Plus · Aprofunde seu silêncio
-                </p>
-                <p className="text-[10px] text-white/60">
-                  Paisagens sonoras estendidas e modo santuário
-                </p>
-              </div>
-              <button
-                onClick={() => setShowPlus(true)}
-                className="rounded border border-[var(--gold)]/50 bg-[var(--gold)]/15 px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-[var(--gold)] hover:bg-[var(--gold)]/25"
-              >
-                Conhecer
-              </button>
-            </div>
-          )}
+        {/* Prévia da oferta TIDE Plus */}
+        <div className="mt-6 flex items-center justify-between gap-3 rounded-lg border border-white/15 bg-gradient-to-r from-white/5 to-[var(--gold)]/10 p-3.5 backdrop-blur-xs">
+          <div>
+            <p className="text-xs font-medium text-white/95">✦ TIDE Plus · Compra única</p>
+            <p className="text-[10px] text-white/60">Conheça os extras planejados para o Plus</p>
+          </div>
+          <button
+            onClick={() => setShowPlus(true)}
+            className="rounded border border-[var(--gold)]/50 bg-[var(--gold)]/15 px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-[var(--gold)] hover:bg-[var(--gold)]/25"
+          >
+            Conhecer
+          </button>
         </div>
 
         {/* Estatísticas */}
