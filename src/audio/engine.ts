@@ -32,7 +32,7 @@ export class TideAudio {
   private noteTimer = 0;
   private bubbleTimer = 0;
   private whaleTimer = 0;
-  private timerId: number | null = null;
+  private timerId: ReturnType<typeof setInterval> | null = null;
   private running = false;
   private biome: BiomeId = "reef";
   private volumes: AudioSettings = { music: 0.42, ambient: 0.5, sfx: 0.38 };
@@ -157,7 +157,7 @@ export class TideAudio {
     // Em vez de 60fps no requestAnimationFrame para decrementar números,
     // usamos um timer eficiente de 200ms que consome ~0% de CPU
     if (this.timerId !== null) clearInterval(this.timerId);
-    this.timerId = window.setInterval(() => {
+    this.timerId = setInterval(() => {
       if (!this.running) return;
       const now = performance.now();
       const dt = Math.min(0.5, (now - this.last) / 1000);

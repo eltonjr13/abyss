@@ -54,7 +54,7 @@ class PerformanceMonitor {
   private audioSampleRate = 0;
   private audioOutputLatencyMs = 0;
 
-  private notifyTimer: number | null = null;
+  private notifyTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this.initBattery();
