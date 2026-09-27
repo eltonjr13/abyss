@@ -22,7 +22,7 @@ function Shell() {
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
-      setStatusMessage("Conexão restabelecida · Oceano sincronizado");
+      setStatusMessage("Conexão restabelecida · Progresso salvo neste dispositivo");
       setShowStatusToast(true);
       const t = setTimeout(() => setShowStatusToast(false), 3500);
       return () => clearTimeout(t);
@@ -64,7 +64,7 @@ function Shell() {
         <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-[#061018]/25 via-transparent to-[#061018]/70" />
       )}
 
-      {/* Notificação discreta de status de rede (Item 8) */}
+      {/* Notificação discreta de status de rede */}
       {showStatusToast && (
         <div
           role="status"
@@ -88,7 +88,7 @@ function Shell() {
       {view === "profile" && <Profile />}
 
       {showNav && <NavBar />}
-      <PerfPanel />
+      {import.meta.env.DEV && <PerfPanel />}
     </div>
   );
 }

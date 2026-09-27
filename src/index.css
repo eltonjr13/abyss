@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Cormorant Garamond", ui-serif, Georgia, serif;
-  --font-pixel: "Pixelify Sans", ui-sans-serif, sans-serif;
+  --font-sans: "Outfit Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond Variable", ui-serif, Georgia, serif;
+  --font-pixel: "Pixelify Sans Variable", ui-sans-serif, sans-serif;
 }
 
 :root {
@@ -25,7 +25,7 @@ body,
 
 body {
   margin: 0;
-  font-family: Outfit, ui-sans-serif, system-ui, sans-serif;
+  font-family: "Outfit Variable", ui-sans-serif, system-ui, sans-serif;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
 }
@@ -52,7 +52,7 @@ input:focus-visible {
 }
 
 .font-pixel {
-  font-family: "Pixelify Sans", ui-sans-serif, sans-serif;
+  font-family: "Pixelify Sans Variable", ui-sans-serif, sans-serif;
 }
 
 .rise {

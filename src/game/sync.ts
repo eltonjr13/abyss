@@ -103,6 +103,22 @@ export function mergeGameStates(local: GameState, remote: GameState): GameState 
         : remote.lastSessionDate
       : local.lastSessionDate || remote.lastSessionDate || null;
 
+  // Preserva o status do Plus Vitalício se estiver ativo em qualquer um dos dispositivos
+  const isPlus = Boolean(local.plus?.isPlus || remote.plus?.isPlus);
+  const plus = isPlus
+    ? (local.plus?.isPlus ? local.plus : remote.plus) || {
+        isPlus: true,
+        unlockedAt: new Date().toISOString(),
+        transactionId: "sync",
+        source: "restore",
+      }
+    : {
+        isPlus: false,
+        unlockedAt: null,
+        transactionId: null,
+        source: "none",
+      };
+
   return {
     ...local,
     seenOnboarding: local.seenOnboarding || remote.seenOnboarding,
@@ -115,5 +131,6 @@ export function mergeGameStates(local: GameState, remote: GameState): GameState 
     biomeLife,
     discovered,
     history,
+    plus,
   };
 }

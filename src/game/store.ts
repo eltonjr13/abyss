@@ -21,7 +21,9 @@ export type GameAction =
   | { type: "audio"; audio: AudioSettings }
   | { type: "reset"; now: number }
   | { type: "day"; today: string }
-  | { type: "import"; state: GameState };
+  | { type: "import"; state: GameState }
+  | { type: "unlock_plus"; transactionId?: string; source?: "purchase" | "restore" | "code" }
+  | { type: "revoke_plus" };
 
 export function initialGameData(): GameData {
   return { ...loadSnapshot(), rewards: null };
@@ -81,7 +83,12 @@ export function gameReducer(data: GameData, action: GameAction): GameData {
       return { ...data, state: { ...data.state, audio: action.audio } };
     case "reset":
       return {
-        state: { ...freshState(action.now), seenOnboarding: true, audio: data.state.audio },
+        state: {
+          ...freshState(action.now),
+          seenOnboarding: true,
+          audio: data.state.audio,
+          plus: data.state.plus,
+        },
         session: null,
         rewards: null,
       };
@@ -94,6 +101,32 @@ export function gameReducer(data: GameData, action: GameAction): GameData {
         ...data,
         state: refreshDay(action.state, todayKey(new Date())),
         rewards: null,
+      };
+    case "unlock_plus":
+      return {
+        ...data,
+        state: {
+          ...data.state,
+          plus: {
+            isPlus: true,
+            unlockedAt: new Date().toISOString(),
+            transactionId: action.transactionId ?? `tide_plus_${Date.now()}`,
+            source: action.source ?? "purchase",
+          },
+        },
+      };
+    case "revoke_plus":
+      return {
+        ...data,
+        state: {
+          ...data.state,
+          plus: {
+            isPlus: false,
+            unlockedAt: null,
+            transactionId: null,
+            source: "none",
+          },
+        },
       };
   }
 }

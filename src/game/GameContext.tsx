@@ -34,6 +34,8 @@ interface GameContextValue {
   setAudio: (a: AudioSettings) => void;
   resetSave: () => void;
   importState: (incoming: GameState) => void;
+  unlockPlus: (transactionId?: string, source?: "purchase" | "restore" | "code") => void;
+  revokePlus: () => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -120,6 +122,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "import", state: incoming });
   }, []);
 
+  const unlockPlus = useCallback(
+    (transactionId?: string, source?: "purchase" | "restore" | "code") => {
+      dispatch({ type: "unlock_plus", transactionId, source });
+    },
+    [],
+  );
+
+  const revokePlus = useCallback(() => {
+    dispatch({ type: "revoke_plus" });
+  }, []);
+
   const value = useMemo(
     () => ({
       state,
@@ -139,6 +152,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setAudio,
       resetSave,
       importState,
+      unlockPlus,
+      revokePlus,
     }),
     [
       state,
@@ -156,6 +171,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setAudio,
       resetSave,
       importState,
+      unlockPlus,
+      revokePlus,
     ],
   );
 

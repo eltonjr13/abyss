@@ -142,8 +142,27 @@ export function hydrate(raw: unknown, now = Date.now()): GameState {
       sfx: clamp(nonNegative(audio.sfx, initial.audio.sfx), 0, 1),
     },
     pity: safePity,
+    plus: hydratePlus(source.plus, now),
   };
   return refreshDay(state, todayKey(new Date(now)));
+}
+
+function hydratePlus(raw: unknown, now: number): PlusEntitlement {
+  const source = record(raw);
+  const isPlus = source.isPlus === true;
+  const sourceKind = source.source;
+  const validSource =
+    sourceKind === "purchase" || sourceKind === "restore" || sourceKind === "code"
+      ? sourceKind
+      : isPlus
+      ? "purchase"
+      : "none";
+  return {
+    isPlus,
+    unlockedAt: typeof source.unlockedAt === "string" ? source.unlockedAt : isPlus ? new Date(now).toISOString() : null,
+    transactionId: typeof source.transactionId === "string" ? source.transactionId : null,
+    source: validSource,
+  };
 }
 
 function hydrateSession(raw: unknown, state: GameState, now: number): ActiveSession | null {
@@ -211,4 +230,12 @@ export function overallLife(state: GameState): number {
   if (!ids.length) return 0;
   const sum = ids.reduce((acc, id) => acc + (state.biomeLife[id] ?? 0), 0);
   return sum / ids.length;
+}
+
+export function hasPlus(state: GameState): boolean {
+  return Boolean(state.plus?.isPlus);
+}
+
+export function canAccess(state: GameState, _feature: PlusFeatureId): boolean {
+  return hasPlus(state);
 }
