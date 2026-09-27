@@ -1,12 +1,19 @@
 import { BIOME_ORDER } from "../data/biomes";
 import { SPECIES } from "../data/species";
 import { clamp, shiftDateKey, todayKey } from "../lib/format";
-import type { ActiveSession, BiomeId, GameState } from "../types";
+import type { ActiveSession, BiomeId, GameState, PlusEntitlement, PlusFeatureId } from "../types";
 
 const KEY = "tide-save-v2";
 const LEGACY_KEY = "tide-save-v1";
 const speciesIds = new Set(SPECIES.map((species) => species.id));
 const biomeIds = new Set<string>(BIOME_ORDER);
+
+export const DEFAULT_PLUS: PlusEntitlement = {
+  isPlus: false,
+  unlockedAt: null,
+  transactionId: null,
+  source: "none",
+};
 
 export interface SaveSnapshot {
   state: GameState;
@@ -29,6 +36,7 @@ export const INITIAL: GameState = {
   history: [],
   audio: { music: 0.42, ambient: 0.5, sfx: 0.38 },
   pity: {},
+  plus: { ...DEFAULT_PLUS },
 };
 
 export function freshState(now = Date.now()): GameState {
@@ -41,6 +49,7 @@ export function freshState(now = Date.now()): GameState {
     history: [],
     audio: { ...INITIAL.audio },
     pity: {},
+    plus: { ...DEFAULT_PLUS },
   };
 }
 

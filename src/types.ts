@@ -103,6 +103,20 @@ export interface Rewards {
   quote: string;
 }
 
+export type PlusFeatureId =
+  | "soundscapes_extended"
+  | "sanctuary_mode"
+  | "deep_metrics"
+  | "tide_atmospheres"
+  | "naturalist_cards";
+
+export interface PlusEntitlement {
+  isPlus: boolean;
+  unlockedAt: string | null;
+  transactionId: string | null;
+  source: "purchase" | "restore" | "code" | "none";
+}
+
 export interface GameState {
   seenOnboarding: boolean;
   xp: number;
@@ -119,6 +133,7 @@ export interface GameState {
   history: DayRecord[];
   audio: AudioSettings;
   pity: Record<string, number>;
+  plus: PlusEntitlement;
 }
 
 export interface ActiveSession {

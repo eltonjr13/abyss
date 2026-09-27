@@ -3,6 +3,7 @@ import { BIOMES } from "../data/biomes";
 import { useGame } from "../game/GameContext";
 import { elapsedSeconds, MIN_REWARD_SECONDS } from "../game/session";
 import { formatTimer } from "../lib/format";
+import { notifySessionComplete, requestNotificationPermission } from "../lib/notifications";
 
 export function Focus() {
   const { session, pauseSession, resumeSession, completeSession, abandonSession } = useGame();
@@ -44,10 +45,15 @@ export function Focus() {
   const remaining = planned === null ? null : Math.max(0, planned - elapsed);
 
   useEffect(() => {
+    void requestNotificationPermission();
+  }, []);
+
+  useEffect(() => {
     if (!session || planned === null || remaining !== 0 || doneRef.current) return;
     doneRef.current = true;
+    notifySessionComplete(biome.name, Math.round((planned ?? elapsed) / 60));
     completeSession();
-  }, [session, planned, remaining, completeSession]);
+  }, [session, planned, remaining, completeSession, biome.name, elapsed]);
 
   useEffect(() => {
     document.title = session
