@@ -20,7 +20,8 @@ export type GameAction =
   | { type: "abandon" }
   | { type: "audio"; audio: AudioSettings }
   | { type: "reset"; now: number }
-  | { type: "day"; today: string };
+  | { type: "day"; today: string }
+  | { type: "import"; state: GameState };
 
 export function initialGameData(): GameData {
   return { ...loadSnapshot(), rewards: null };
@@ -88,5 +89,11 @@ export function gameReducer(data: GameData, action: GameAction): GameData {
       const state = refreshDay(data.state, action.today);
       return state === data.state ? data : { ...data, state };
     }
+    case "import":
+      return {
+        ...data,
+        state: refreshDay(action.state, todayKey(new Date())),
+        rewards: null,
+      };
   }
 }

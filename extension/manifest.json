@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "TIDE — O Oceano que Você Restaura",
+  "version": "1.0.0",
+  "description": "Cronômetro de foco e restauração de recifes marinhos. Cada minuto de concentração traz vida ao oceano.",
+  "permissions": ["storage", "alarms", "notifications"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "TIDE Foco"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

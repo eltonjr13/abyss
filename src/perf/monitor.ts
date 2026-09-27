@@ -14,7 +14,7 @@ export interface PerfMetrics {
   activePlants: number;
   activeDebris: number;
   activeRays: number;
-  audioState: "running" | "suspended" | "closed" | "uninitialized";
+  audioState: "running" | "suspended" | "closed" | "interrupted" | "uninitialized";
   audioSampleRate: number;
   audioOutputLatencyMs: number;
   batteryLevel: number | null; // 0 a 100%
@@ -50,7 +50,7 @@ class PerformanceMonitor {
   private rayCount = 0;
 
   // Métricas do AudioEngine
-  private audioState: "running" | "suspended" | "closed" | "uninitialized" = "uninitialized";
+  private audioState: AudioContextState | "uninitialized" = "uninitialized";
   private audioSampleRate = 0;
   private audioOutputLatencyMs = 0;
 
@@ -157,7 +157,7 @@ class PerformanceMonitor {
 
   // Instrumentação do AudioEngine
   updateAudioMetrics(metrics: {
-    state: "running" | "suspended" | "closed" | "uninitialized";
+    state: AudioContextState | "uninitialized";
     sampleRate: number;
     outputLatencyMs: number;
   }) {

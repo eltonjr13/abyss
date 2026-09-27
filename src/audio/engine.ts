@@ -1,4 +1,5 @@
 import type { AudioSettings, BiomeId } from "../types";
+import { perfMonitor } from "../perf/monitor";
 
 type PadHandle = { stop: (at?: number) => void };
 
@@ -31,11 +32,55 @@ export class TideAudio {
   private noteTimer = 0;
   private bubbleTimer = 0;
   private whaleTimer = 0;
-  private raf = 0;
+  private timerId: number | null = null;
   private running = false;
   private biome: BiomeId = "reef";
   private volumes: AudioSettings = { music: 0.42, ambient: 0.5, sfx: 0.38 };
   private last = 0;
+  private pauseOnBackground = true;
+  private suspendedForBackground = false;
+
+  constructor() {
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", this.handleVisibility);
+    }
+  }
+
+  private syncPerfMetrics() {
+    if (!this.ctx) {
+      perfMonitor.updateAudioMetrics({
+        state: "uninitialized",
+        sampleRate: 0,
+        outputLatencyMs: 0,
+      });
+      return;
+    }
+    const latency = ((this.ctx as unknown as { outputLatency?: number }).outputLatency ?? this.ctx.baseLatency ?? 0) * 1000;
+    perfMonitor.updateAudioMetrics({
+      state: this.ctx.state,
+      sampleRate: this.ctx.sampleRate,
+      outputLatencyMs: latency,
+    });
+  }
+
+  setPauseOnBackground(pause: boolean) {
+    this.pauseOnBackground = pause;
+  }
+
+  private handleVisibility = () => {
+    if (!this.ctx || !this.running) return;
+    if (document.hidden) {
+      if (this.pauseOnBackground && this.ctx.state === "running") {
+        this.suspendedForBackground = true;
+        void this.ctx.suspend().then(() => this.syncPerfMetrics());
+      }
+    } else {
+      if (this.suspendedForBackground && this.ctx.state === "suspended") {
+        this.suspendedForBackground = false;
+        void this.ctx.resume().then(() => this.syncPerfMetrics());
+      }
+    }
+  };
 
   async ensure() {
     if (!this.ctx) {
@@ -82,6 +127,7 @@ export class TideAudio {
       this.sfxGain = sfx;
     }
     if (this.ctx.state === "suspended") await this.ctx.resume();
+    this.syncPerfMetrics();
   }
 
   setVolumes(v: AudioSettings) {
@@ -90,6 +136,7 @@ export class TideAudio {
     this.musicGain?.gain.setTargetAtTime(v.music, t, 0.08);
     this.ambientGain?.gain.setTargetAtTime(v.ambient, t, 0.08);
     this.sfxGain?.gain.setTargetAtTime(v.sfx, t, 0.08);
+    this.syncPerfMetrics();
   }
 
   async start(biome: BiomeId) {
@@ -106,14 +153,19 @@ export class TideAudio {
     this.noteTimer = 4;
     this.bubbleTimer = 2;
     this.whaleTimer = 18 + Math.random() * 20;
-    const loop = (now: number) => {
+
+    // Em vez de 60fps no requestAnimationFrame para decrementar números,
+    // usamos um timer eficiente de 200ms que consome ~0% de CPU
+    if (this.timerId !== null) clearInterval(this.timerId);
+    this.timerId = window.setInterval(() => {
       if (!this.running) return;
-      const dt = Math.min(0.05, (now - this.last) / 1000);
+      const now = performance.now();
+      const dt = Math.min(0.5, (now - this.last) / 1000);
       this.last = now;
       this.tick(dt);
-      this.raf = requestAnimationFrame(loop);
-    };
-    this.raf = requestAnimationFrame(loop);
+    }, 200);
+
+    this.syncPerfMetrics();
   }
 
   setBiome(biome: BiomeId) {
@@ -122,11 +174,15 @@ export class TideAudio {
     if (!this.running) return;
     this.crossPad(biome);
     this.tuneNoise(biome);
+    this.syncPerfMetrics();
   }
 
   stop() {
     this.running = false;
-    cancelAnimationFrame(this.raf);
+    if (this.timerId !== null) {
+      clearInterval(this.timerId);
+      this.timerId = null;
+    }
     this.pad?.stop();
     this.pad = null;
     try {
@@ -135,6 +191,7 @@ export class TideAudio {
       /* already */
     }
     this.noise = null;
+    this.syncPerfMetrics();
   }
 
   chime() {

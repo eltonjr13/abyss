@@ -284,8 +284,9 @@ export class OceanEngine {
       });
     }
 
+    const isLowPower = perfMonitor.isLowPowerMode();
     this.bubbles = [];
-    const bcount = 14 + Math.floor(life / 10);
+    const bcount = Math.floor((14 + Math.floor(life / 10)) * (isLowPower ? 0.6 : 1));
     for (let i = 0; i < bcount; i++) {
       this.bubbles.push({
         x: rng() * W,
@@ -297,7 +298,8 @@ export class OceanEngine {
     }
 
     this.motes = [];
-    const mcount = night ? 50 : 28;
+    const baseMcount = night ? 50 : 28;
+    const mcount = Math.floor(baseMcount * (isLowPower ? 0.45 : 1));
     for (let i = 0; i < mcount; i++) {
       this.motes.push({
         x: rng() * W,
@@ -319,13 +321,28 @@ export class OceanEngine {
         phase: rng() * Math.PI * 2,
       });
     }
+
+    perfMonitor.updateEntityCounts({
+      fish: this.fish.length,
+      bubbles: this.bubbles.length,
+      motes: this.motes.length,
+      plants: this.plants.length,
+      debris: this.debris.length,
+      rays: this.rays.length,
+    });
   }
 
-  private tick(dt: number) {
+  private tick(dt: number, now: number) {
     const speed = (this.reduced ? 0.35 : 1) * (this.config.intensity || 1);
     this.t += dt * speed;
+
+    const t0 = performance.now();
     this.simulate(dt * speed);
+    const t1 = performance.now();
     this.draw();
+    const t2 = performance.now();
+
+    perfMonitor.recordFrame(now, t1 - t0, t2 - t1);
   }
 
   private simulate(dt: number) {

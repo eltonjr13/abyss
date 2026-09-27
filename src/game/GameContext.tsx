@@ -33,6 +33,7 @@ interface GameContextValue {
   abandonSession: () => void;
   setAudio: (a: AudioSettings) => void;
   resetSave: () => void;
+  importState: (incoming: GameState) => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -115,6 +116,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setView("home");
   }, []);
 
+  const importState = useCallback((incoming: GameState) => {
+    dispatch({ type: "import", state: incoming });
+  }, []);
+
   const value = useMemo(
     () => ({
       state,
@@ -133,6 +138,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       abandonSession,
       setAudio,
       resetSave,
+      importState,
     }),
     [
       state,
@@ -149,6 +155,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       abandonSession,
       setAudio,
       resetSave,
+      importState,
     ],
   );
 
