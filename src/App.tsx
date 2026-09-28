@@ -12,6 +12,7 @@ import { Onboarding } from "./screens/Onboarding";
 import { Profile } from "./screens/Profile";
 import { Setup } from "./screens/Setup";
 import { PerfPanel } from "./components/PerfPanel";
+import { AuthProvider } from "./auth/AuthContext";
 
 function Shell() {
   const { view, state } = useGame();
@@ -95,8 +96,10 @@ function Shell() {
 
 export default function App() {
   return (
-    <GameProvider>
-      <Shell />
-    </GameProvider>
+    <AuthProvider>
+      <GameProvider>
+        <Shell />
+      </GameProvider>
+    </AuthProvider>
   );
 }

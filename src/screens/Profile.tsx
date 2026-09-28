@@ -10,6 +10,7 @@ import { perfMonitor, type PerfMetrics } from "../perf/monitor";
 import { SyncModal } from "../components/SyncModal";
 import { PlusModal } from "../components/PlusModal";
 import { cn } from "../utils/cn";
+import { AccountCard } from "../components/AccountCard";
 
 export function Profile() {
   const { state, setAudio, resetSave } = useGame();
@@ -87,6 +88,8 @@ export function Profile() {
         <p className="mt-2 text-center text-[12px] text-white/60">
           {state.xp} XP · próximo {prog.next}
         </p>
+
+        <AccountCard />
 
         {/* Prévia da oferta TIDE Plus */}
         <div className="mt-6 flex items-center justify-between gap-3 rounded-lg border border-white/15 bg-gradient-to-r from-white/5 to-[var(--gold)]/10 p-3.5 backdrop-blur-xs">
