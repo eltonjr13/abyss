@@ -14,6 +14,7 @@ interface Profile {
 
 interface AuthValue {
   configured: boolean;
+  googleEnabled: boolean;
   loading: boolean;
   busy: boolean;
   user: User | null;
@@ -24,6 +25,7 @@ interface AuthValue {
 }
 
 const AuthContext = createContext<AuthValue | null>(null);
+const googleEnabled = import.meta.env.VITE_GOOGLE_AUTH_ENABLED === "true";
 
 function displayNameFor(user: User): string {
   const googleName = user.user_metadata?.full_name ?? user.user_metadata?.name;
@@ -47,6 +49,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function refresh() {
       const current = ++sequence;
+      const { data: sessionData, error: sessionError } = await client.auth.getSession();
+      if (!active || current !== sequence) return;
+      if (sessionError || !sessionData.session) {
+        setUser(null);
+        setProfile(null);
+        setError(sessionError ? "Não foi possível verificar sua conta. Tente novamente com internet." : null);
+        setLoading(false);
+        return;
+      }
+
       const { data, error: authError } = await client.auth.getUser();
       if (!active || current !== sequence) return;
       if (authError || !data.user) {
@@ -143,7 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function signInWithGoogle() {
-    if (!supabase) return;
+    if (!supabase || !googleEnabled) return;
     setBusy(true);
     setError(null);
     const native = Capacitor.isNativePlatform();
@@ -178,6 +190,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={{
       configured: Boolean(supabase), loading, busy, user, profile, error,
+      googleEnabled,
       signInWithGoogle, signOut,
     }}>
       {children}

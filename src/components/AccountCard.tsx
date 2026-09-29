@@ -1,16 +1,12 @@
 import { useAuth } from "../auth/AuthContext";
 
 export function AccountCard() {
-  const { configured, loading, busy, user, profile, error, signInWithGoogle, signOut } = useAuth();
+  const { configured, googleEnabled, loading, busy, user, profile, error, signInWithGoogle, signOut } = useAuth();
 
   return (
     <section className="mt-8 rounded-lg border border-white/15 bg-[#071018]/70 p-4" aria-label="Conta">
       <p className="text-[11px] font-medium tracking-[0.28em] text-white/70 uppercase">Conta</p>
-      {!configured ? (
-        <p className="mt-3 text-xs leading-relaxed text-white/70">
-          O login com Google estará disponível após configurar o serviço de contas.
-        </p>
-      ) : loading ? (
+      {loading ? (
         <p className="mt-3 text-xs text-white/70" role="status">Verificando sua conta…</p>
       ) : user ? (
         <>
@@ -27,6 +23,10 @@ export function AccountCard() {
             Sair da conta
           </button>
         </>
+      ) : !configured || !googleEnabled ? (
+        <p className="mt-3 text-xs leading-relaxed text-white/70">
+          O login com Google estará disponível após concluir a configuração do Google.
+        </p>
       ) : (
         <>
           <p className="mt-3 text-xs leading-relaxed text-white/70">
