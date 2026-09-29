@@ -9,6 +9,7 @@ import { getAudio } from "../audio/engine";
 import { perfMonitor, type PerfMetrics } from "../perf/monitor";
 import { SyncModal } from "../components/SyncModal";
 import { PlusModal } from "../components/PlusModal";
+import { LegalModal, type LegalDocType } from "../components/LegalModal";
 import { cn } from "../utils/cn";
 import { AccountCard } from "../components/AccountCard";
 
@@ -16,6 +17,8 @@ export function Profile() {
   const { state, setAudio, resetSave } = useGame();
   const [showSync, setShowSync] = useState(false);
   const [showPlus, setShowPlus] = useState(false);
+  const [showLegal, setShowLegal] = useState(false);
+  const [legalDoc, setLegalDoc] = useState<LegalDocType>("privacy");
   const [metrics, setMetrics] = useState<PerfMetrics>(() => perfMonitor.getMetrics());
   const [pauseAudioOnExit, setPauseAudioOnExit] = useState(() => {
     try {
@@ -253,6 +256,36 @@ export function Profile() {
           </p>
         </div>
 
+        {/* Informações Legais & Privacidade */}
+        <p className="mt-8 text-[11px] font-medium tracking-[0.28em] text-white/70 uppercase">
+          Informações Legais & Privacidade
+        </p>
+        <div className="mt-3 space-y-2 rounded-lg border border-white/10 bg-[#071018]/50 p-4">
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setLegalDoc("privacy");
+                setShowLegal(true);
+              }}
+              className="flex-1 rounded border border-white/20 bg-white/5 py-2 text-center text-xs text-white/80 hover:bg-white/10"
+            >
+              Política de Privacidade
+            </button>
+            <button
+              onClick={() => {
+                setLegalDoc("terms");
+                setShowLegal(true);
+              }}
+              className="flex-1 rounded border border-white/20 bg-white/5 py-2 text-center text-xs text-white/80 hover:bg-white/10"
+            >
+              Termos de Uso
+            </button>
+          </div>
+          <p className="text-center text-[10px] text-white/50">
+            Em conformidade com a LGPD e diretrizes da Google Play e App Store.
+          </p>
+        </div>
+
         <p className="mt-10 font-serif text-sm leading-relaxed text-white/60 italic text-center">
           Depois de semanas, olhe para o oceano e lembre: isso existe porque você conseguiu
           manter o foco.
@@ -272,6 +305,9 @@ export function Profile() {
 
       {showSync && <SyncModal onClose={() => setShowSync(false)} />}
       {showPlus && <PlusModal onClose={() => setShowPlus(false)} />}
+      {showLegal && (
+        <LegalModal initialDoc={legalDoc} onClose={() => setShowLegal(false)} />
+      )}
     </div>
   );
 }
