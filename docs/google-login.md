@@ -25,12 +25,12 @@ O app continua utilizável sem conta. Entrar com Google cria um usuário no Supa
 
 ## Retorno ao app instalado com Capacitor
 
-O código já abre a autenticação no navegador do sistema e espera o retorno `cloud.mergulhe.app://auth/callback` pela API `appUrlOpen` do Capacitor. Ao gerar os projetos `android/` e `ios/`, registre esse endereço nos projetos nativos antes de testar os builds:
+O código já abre a autenticação no navegador do sistema e espera o retorno `cloud.mergulhe.app://auth/callback` pela API `appUrlOpen` do Capacitor. O projeto `android/` já foi gerado e registra esse retorno no manifesto. Ao gerar o projeto `ios/`, registre o mesmo endereço antes de testar o build:
 
-- Android: em `android/app/src/main/AndroidManifest.xml`, dentro de `MainActivity`, adicione um `intent-filter` com `action` `android.intent.action.VIEW`, categorias `DEFAULT` e `BROWSABLE`, e `<data android:scheme="cloud.mergulhe.app" android:host="auth" android:path="/callback" />`.
+- Android: `android/app/src/main/AndroidManifest.xml` já contém o `intent-filter` com `action` `android.intent.action.VIEW`, categorias `DEFAULT` e `BROWSABLE`, e `<data android:scheme="cloud.mergulhe.app" android:host="auth" android:path="/callback" />`.
 - iOS: em `ios/App/App/Info.plist`, adicione `CFBundleURLTypes` com `CFBundleURLSchemes` contendo `cloud.mergulhe.app`.
 - Depois de sincronizar os plugins (`npx cap sync`), valide em aparelhos Android e iOS o retorno do Google, a persistência da sessão após fechar o app e a saída da conta.
 
-Para abrir o login a outras pessoas, é preciso concluir o branding do OAuth com `https://mergulhe.cloud`, páginas públicas de privacidade e termos, verificar o domínio e publicar a tela de consentimento no Google Cloud. O callback do cliente Google continua sendo o URL do Supabase; a landing page não substitui esse callback. Os projetos nativos e seus redirects ainda precisam ser gerados e testados em Android e iOS. Para publicar no iOS, também é necessário planejar uma opção de login equivalente que atenda à [diretriz 4.8 da Apple](https://developer.apple.com/app-store/review/guidelines/), além do fluxo de exclusão de conta.
+Para abrir o login a outras pessoas, é preciso concluir o branding do OAuth com `https://mergulhe.cloud`, páginas públicas de privacidade e termos, verificar o domínio e publicar a tela de consentimento no Google Cloud. O callback do cliente Google continua sendo o URL do Supabase; a landing page não substitui esse callback. O redirect Android ainda precisa ser cadastrado no Supabase e testado em aparelho; o projeto iOS ainda precisa ser gerado. Para publicar no iOS, também é necessário planejar uma opção de login equivalente que atenda à [diretriz 4.8 da Apple](https://developer.apple.com/app-store/review/guidelines/), além do fluxo de exclusão de conta.
 
 O build `npm run build:extension` desativa o login Google apenas dentro da extensão: ainda não há um redirect OAuth da extensão publicado e testado. O app completo empacotado nela continua utilizável sem conta, e o progresso fica no armazenamento local da extensão.
