@@ -16,7 +16,7 @@ export function Home() {
       <header className="flex w-full max-w-lg items-start justify-between gap-4">
         <div>
           <WaveMark className="text-[var(--foam)]/70" />
-          <p className="mt-2 font-pixel text-[13px] tracking-[0.5em] text-white/80">TIDE</p>
+          <p className="mt-2 font-pixel text-[13px] tracking-[0.5em] text-white/80">MERGULHE</p>
           <p className="mt-1 text-[10px] tracking-[0.28em] text-white/40 uppercase">
             {TIME_LABEL[tod]}
           </p>

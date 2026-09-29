@@ -1,5 +1,5 @@
 /**
- * TIDE Extension Popup Script
+ * Mergulhe Extension Popup Script
  * Opera de forma síncrona com chrome.storage.local e chrome.alarms
  */
 
@@ -130,7 +130,7 @@ setupControls.querySelectorAll("button").forEach((btn) => {
 });
 
 btnOpenOcean.addEventListener("click", () => {
-  // Abre o app TIDE completo em uma nova aba
+  // Abre o app Mergulhe empacotado na extensão em uma nova aba
   chrome.tabs.create({ url: chrome.runtime.getURL("dist/index.html") });
 });
 

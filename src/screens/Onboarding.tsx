@@ -30,7 +30,7 @@ export function Onboarding() {
         {step === 0 ? (
           <>
             <WaveMark className="mx-auto text-white/70" />
-            <p className="mt-3 font-pixel text-[11px] tracking-[0.55em] text-white/70">TIDE</p>
+            <p className="mt-3 font-pixel text-[11px] tracking-[0.55em] text-white/70">MERGULHE</p>
             <h1 className="mt-6 font-serif text-4xl leading-tight text-[var(--foam)] italic sm:text-5xl">
               Quanto mais você se concentra,
               <br />

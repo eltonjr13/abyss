@@ -1,5 +1,5 @@
 /**
- * TIDE - Chrome Extension Background Service Worker
+ * Mergulhe - Chrome Extension Background Service Worker
  * Mantém o timer de foco vivo mesmo após fechar a janela do popup da extensão.
  */
 
@@ -10,15 +10,15 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === "tide-session-timer") {
-    const data = await chrome.storage.local.get(["session", "state"]);
+    const data = await chrome.storage.local.get(["session"]);
     const session = data.session;
     if (session) {
       // Notificação nativa do Chrome
       chrome.notifications.create({
         type: "basic",
         iconUrl: "icons/icon128.png",
-        title: "TIDE — Foco Concluído!",
-        message: "Seu mergulho de foco terminou. Seu oceano recebeu nova vida e XP!",
+        title: "Mergulhe — foco concluído!",
+        message: "Seu tempo de foco terminou. Abra o oceano para iniciar uma sessão no app.",
         priority: 2,
       });
 

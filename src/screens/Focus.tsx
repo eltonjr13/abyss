@@ -58,10 +58,10 @@ export function Focus() {
 
   useEffect(() => {
     document.title = session
-      ? `${formatTimer(remaining ?? elapsed)} · TIDE`
-      : "TIDE — o oceano que você restaura";
+      ? `${formatTimer(remaining ?? elapsed)} · Mergulhe`
+      : "Mergulhe — seu foco dá vida ao oceano";
     return () => {
-      document.title = "TIDE — o oceano que você restaura";
+      document.title = "Mergulhe — seu foco dá vida ao oceano";
     };
   }, [session, elapsed, remaining]);
 

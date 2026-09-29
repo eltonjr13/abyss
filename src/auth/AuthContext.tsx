@@ -5,7 +5,7 @@ import { App } from "@capacitor/app";
 import { Browser } from "@capacitor/browser";
 import { supabase } from "./client";
 
-const nativeRedirect = "com.tide.oceanfocus://auth/callback";
+const nativeRedirect = "cloud.mergulhe.app://auth/callback";
 
 interface Profile {
   id: string;

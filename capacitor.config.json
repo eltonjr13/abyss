@@ -1,6 +1,6 @@
 {
-  "appId": "com.tide.oceanfocus",
-  "appName": "TIDE",
+  "appId": "cloud.mergulhe.app",
+  "appName": "Mergulhe",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

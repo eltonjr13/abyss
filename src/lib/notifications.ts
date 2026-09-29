@@ -1,5 +1,5 @@
 /**
- * Gerenciador de Notificações do TIDE
+ * Gerenciador de Notificações do Mergulhe
  * Suporta Web Notifications API e vibração háptica para iOS, Android e Web.
  */
 
@@ -30,7 +30,7 @@ export function notifySessionComplete(biomeName: string, minutes: number) {
   // Notificação visual do sistema
   if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
     try {
-      new Notification("TIDE — Foco Concluído!", {
+      new Notification("Mergulhe — foco concluído!", {
         body: `Você permaneceu focado por ${minutes} min em ${biomeName}. Seu oceano recebeu nova vida!`,
         icon: "/favicon.ico",
         badge: "/favicon.ico",

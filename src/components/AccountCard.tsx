@@ -30,7 +30,7 @@ export function AccountCard() {
       ) : (
         <>
           <p className="mt-3 text-xs leading-relaxed text-white/70">
-            Entre com sua conta Google para criar seu perfil no TIDE.
+            Entre com sua conta Google para criar seu perfil no Mergulhe.
           </p>
           <button
             type="button"

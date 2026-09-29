@@ -33,7 +33,7 @@ export function PlusModal({ onClose }: { onClose: () => void }) {
         </button>
 
         <header className="pr-8">
-          <p className="font-pixel text-[11px] tracking-[0.35em] text-[var(--gold)] uppercase">TIDE PLUS</p>
+          <p className="font-pixel text-[11px] tracking-[0.35em] text-[var(--gold)] uppercase">MERGULHE PLUS</p>
           <h2 id="plus-title" className="mt-2 font-serif text-3xl text-white italic">
             Mais espaço para mergulhar
           </h2>

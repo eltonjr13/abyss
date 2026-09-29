@@ -1,8 +1,8 @@
-# P1 — O que o TIDE vende
+# P1 — O que o Mergulhe venderá
 
 ## Decisão
 
-**TIDE Plus será uma compra única, não consumível e permanente para os três extras abaixo.** Não haverá assinatura. O preço ainda não está definido: a tela de compra deverá ler o valor e a moeda da loja, sem preço fixo no código. A compra só poderá ser oferecida depois que os três extras e a verificação de compra estiverem prontos. Hoje a tela no Perfil é uma prévia sem checkout.
+**Mergulhe Plus será uma compra única, não consumível e permanente para os três extras abaixo.** Não haverá assinatura. O preço ainda não está definido: a tela de compra deverá ler o valor e a moeda da loja, sem preço fixo no código. A compra só poderá ser oferecida depois que os três extras e a verificação de compra estiverem prontos. Hoje a tela no Perfil é uma prévia sem checkout.
 
 Permanente significa que a mesma conta da loja poderá restaurar o produto depois de reinstalar o aplicativo ou trocar de aparelho **na mesma loja**. Compra na App Store não libera automaticamente a versão da Google Play, nem vice-versa; acesso entre lojas ou na web exigiria identidade e validação próprias, ainda não planejadas para o primeiro lançamento.
 
@@ -39,7 +39,7 @@ Um único direito de acesso, **`tide_plus_lifetime`** (identificador de produto 
 
 ## Tela de oferta
 
-Entrada: cartão **TIDE Plus · Compra única** no Perfil. A tela apresenta, nesta ordem: título, compromisso de que foco/6 biomas/descobertas são grátis, os três extras com resultados concretos, **Compra única · acesso permanente**, preço retornado pela loja, botão de compra, **Restaurar compra** e **Continuar gratuitamente**. O fechamento deve ser possível sem perda de progresso. Após validação, o estado comprado deve listar os mesmos três extras e permitir restauração; não mostrar um segundo botão de compra.
+Entrada: cartão **Mergulhe Plus · Compra única** no Perfil. A tela apresenta, nesta ordem: título, compromisso de que foco/6 biomas/descobertas são grátis, os três extras com resultados concretos, **Compra única · acesso permanente**, preço retornado pela loja, botão de compra, **Restaurar compra** e **Continuar gratuitamente**. O fechamento deve ser possível sem perda de progresso. Após validação, o estado comprado deve listar os mesmos três extras e permitir restauração; não mostrar um segundo botão de compra.
 
 No P1, a tela é uma prévia: mostra **Compra disponível em breve**, sem preço numérico e sem simular compra/restauração. Quando o checkout estiver integrado, habilitar os botões somente com produto configurado, preço carregado e validação funcional. Não anunciar recursos futuros como se estivessem incluídos na compra atual.
 

@@ -1,12 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "TIDE — O Oceano que Você Restaura",
+  "name": "Mergulhe — foco e oceano",
   "version": "1.0.0",
-  "description": "Cronômetro de foco e restauração de recifes marinhos. Cada minuto de concentração traz vida ao oceano.",
+  "description": "Cronômetro de foco com um oceano virtual que ganha vida conforme você se concentra.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": ["storage", "alarms", "notifications"],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "TIDE Foco"
+    "default_title": "Mergulhe: foco rápido"
   },
   "background": {
     "service_worker": "background.js"

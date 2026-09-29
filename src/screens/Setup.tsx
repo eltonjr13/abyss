@@ -19,7 +19,7 @@ export function Setup() {
   return (
     <div className="relative z-20 flex min-h-dvh flex-col items-center px-5 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-[max(28px,env(safe-area-inset-top))] sm:px-6">
       <div className="rise w-full max-w-sm text-center">
-        <p className="font-pixel text-[10px] tracking-[0.4em] text-white/50">TIDE</p>
+        <p className="font-pixel text-[10px] tracking-[0.4em] text-white/50">MERGULHE</p>
         <h1 className="mt-4 font-serif text-3xl text-[var(--foam)] italic">{biome.name}</h1>
         <p className="mt-2 text-sm text-white/50">Quanto tempo você pode permanecer?</p>
 

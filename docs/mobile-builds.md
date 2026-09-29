@@ -1,6 +1,6 @@
-# TIDE — Guia de Builds para iOS e Android
+# Mergulhe — Guia de Builds para iOS e Android
 
-Este guia detalha os passos para compilar o **TIDE** como aplicativo nativo para **Android** (Google Play Store) e **iOS** (Apple App Store) utilizando o Capacitor.
+Este guia detalha os passos para compilar o **Mergulhe** como aplicativo nativo para **Android** (Google Play Store) e **iOS** (Apple App Store) utilizando o Capacitor. O identificador planejado é `cloud.mergulhe.app`; antes de gerar os projetos nativos, cadastre o retorno `cloud.mergulhe.app://auth/callback` no Supabase e configure os links nativos descritos em `docs/google-login.md`.
 
 ---
 

@@ -91,10 +91,10 @@ export function Profile() {
 
         <AccountCard />
 
-        {/* Prévia da oferta TIDE Plus */}
+        {/* Prévia da oferta Mergulhe Plus */}
         <div className="mt-6 flex items-center justify-between gap-3 rounded-lg border border-white/15 bg-gradient-to-r from-white/5 to-[var(--gold)]/10 p-3.5 backdrop-blur-xs">
           <div>
-            <p className="text-xs font-medium text-white/95">✦ TIDE Plus · Compra única</p>
+            <p className="text-xs font-medium text-white/95">✦ Mergulhe Plus · Compra única</p>
             <p className="text-[10px] text-white/60">Conheça os extras planejados para o Plus</p>
           </div>
           <button

@@ -24,7 +24,7 @@ export function SyncModal({ onClose }: { onClose: () => void }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `tide-oceano-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `mergulhe-oceano-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -71,7 +71,7 @@ export function SyncModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <p className="mt-3 text-xs leading-relaxed text-white/60">
-          Como o TIDE funciona totalmente sem internet no seu aparelho, use esta ferramenta para
+          Como o progresso do Mergulhe fica salvo no aparelho, use esta ferramenta para
           levar o mesmo oceano entre o celular, notebook e extensão Chrome.
         </p>
 

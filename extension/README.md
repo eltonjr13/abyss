@@ -1,6 +1,6 @@
-# TIDE — Extensão Google Chrome (Manifest V3)
+# Mergulhe — Extensão Google Chrome (Manifest V3)
 
-Esta extensão oferece uma **experiência rápida de foco** diretamente na barra de ferramentas do Google Chrome, mantendo o timer **completamente independente** da janela do popup e oferecendo um modo imersivo de "Ver o Oceano".
+Esta extensão oferece uma **experiência rápida de foco** diretamente na barra de ferramentas do Google Chrome, mantendo o timer **completamente independente** da janela do popup e abrindo o app Mergulhe empacotado na extensão em "Ver o Oceano". As sessões do timer rápido não atualizam automaticamente o progresso do app completo.
 
 ---
 
@@ -11,12 +11,12 @@ Esta extensão oferece uma **experiência rápida de foco** diretamente na barra
    - Se você fechar o popup, o timer **continua rodando com precisão**.
    - O tempo restante em minutos é exibido no **badge do ícone** da extensão (ex: `24m`, `15m`, `✓`).
 2. **Notificações Nativas do Sistema**:
-   - Quando o tempo encerra, o Chrome emite uma notificação nativa avisando sobre a conclusão da sessão e recompensas do oceano.
+   - Quando o tempo encerra, o Chrome emite uma notificação nativa avisando sobre a conclusão do timer rápido.
 3. **Modo Rápido de Foco**:
    - Início com 1 clique (15 min, 25 min, 45 min).
    - Pausa e retomada sem perda de tempo decorrido.
 4. **Modo "Ver o Oceano"**:
-   - Botão para abrir o TIDE em tela cheia numa nova aba, permitindo contemplar os biomas, peixes e paisagens sonoras completas.
+   - Botão para abrir o Mergulhe em tela cheia numa nova aba, permitindo contemplar os biomas, peixes e paisagens sonoras completas.
 
 ---
 
@@ -32,7 +32,7 @@ Esta extensão oferece uma **experiência rápida de foco** diretamente na barra
    ```text
    abyss/extension
    ```
-5. Pronto! O ícone do TIDE aparecerá na sua barra de extensões. Fixe-o na barra de ferramentas para acesso rápido.
+5. Pronto! O ícone do Mergulhe aparecerá na sua barra de extensões. Fixe-o na barra de ferramentas para acesso rápido.
 
 ---
 
@@ -42,6 +42,6 @@ Esta extensão oferece uma **experiência rápida de foco** diretamente na barra
    ```bash
    npm run build
    ```
-2. Compacte o conteúdo da pasta `extension` juntamente com a pasta `dist` gerada em um arquivo `.zip`.
+2. Monte uma pasta de distribuição com o **conteúdo** de `extension` na raiz (incluindo `manifest.json` e `icons/`) e `dist/` dentro dela. Compacte o conteúdo dessa pasta em um `.zip` com `manifest.json` na raiz.
 3. Acesse o [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
-4. Faça upload do arquivo `.zip` e configure as descrições e capturas de tela preparadas na pasta `docs/store-listings.md`.
+4. Faça upload do arquivo `.zip` e configure descrições e capturas reais conforme `docs/store-listings.md`. Depois da publicação, use o endereço da listagem como destino do botão principal em `mergulhe.cloud`.
