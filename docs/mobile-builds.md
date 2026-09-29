@@ -19,9 +19,11 @@ npm run typecheck
 npm run build
 npx cap sync android
 .\android\gradlew.bat -p android assembleDebug
+New-Item -ItemType Directory -Force builds | Out-Null
+Copy-Item android/app/build/outputs/apk/debug/app-debug.apk builds/Mergulhe-v1-android-teste.apk -Force
 ```
 
-O arquivo será `android/app/build/outputs/apk/debug/app-debug.apk`. O build web precisa ocorrer **antes** de `cap sync`, pois o Capacitor copia `dist/` para o projeto Android. Repita `build`, `sync` e `assembleDebug` após cada alteração do app.
+O Gradle gera `android/app/build/outputs/apk/debug/app-debug.apk`; a última linha copia o resultado para `builds/Mergulhe-v1-android-teste.apk`. O build web precisa ocorrer **antes** de `cap sync`, pois o Capacitor copia `dist/` para o projeto Android. Repita `build`, `sync` e `assembleDebug` após cada alteração do app.
 
 ## Instalar e validar no celular
 
@@ -30,3 +32,5 @@ Copie o APK para o Android e abra o arquivo no aparelho, autorizando a instalaç
 Valide a abertura, o cronômetro de foco, pausa e retomada ao minimizar, persistência do progresso após fechar e abrir, e a entrada e saída com Google. O login deve voltar do navegador para o Mergulhe; confira que a conta aparece na tela Perfil. O progresso permanece local ao dispositivo e não é sincronizado pelo login.
 
 O APK de depuração é assinado automaticamente com uma chave local de desenvolvimento em `.android-user/debug.keystore` (ignorada pelo Git). Guarde essa chave para atualizar o app instalado sem reinstalar; uma chave diferente pode exigir desinstalar o app e perder dados locais. Preserve uma chave de lançamento separada quando houver uma versão de distribuição. Um build de iOS, assinatura de produção e envio às lojas são etapas futuras.
+
+Em 29/09/2026, o build `assembleDebug` foi concluído e a assinatura foi verificada. O aparelho não estava conectado por USB, então abertura, desempenho e login Google ainda dependem de teste físico.
