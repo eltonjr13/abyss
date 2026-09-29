@@ -32,3 +32,5 @@ O código já abre a autenticação no navegador do sistema e espera o retorno `
 - Depois de sincronizar os plugins (`npx cap sync`), valide em aparelhos Android e iOS o retorno do Google, a persistência da sessão após fechar o app e a saída da conta.
 
 Para abrir o login a outras pessoas, é preciso concluir o branding do OAuth com `https://mergulhe.cloud`, páginas públicas de privacidade e termos, verificar o domínio e publicar a tela de consentimento no Google Cloud. O callback do cliente Google continua sendo o URL do Supabase; a landing page não substitui esse callback. Os projetos nativos e seus redirects ainda precisam ser gerados e testados em Android e iOS. Para publicar no iOS, também é necessário planejar uma opção de login equivalente que atenda à [diretriz 4.8 da Apple](https://developer.apple.com/app-store/review/guidelines/), além do fluxo de exclusão de conta.
+
+O build `npm run build:extension` desativa o login Google apenas dentro da extensão: ainda não há um redirect OAuth da extensão publicado e testado. O app completo empacotado nela continua utilizável sem conta, e o progresso fica no armazenamento local da extensão.

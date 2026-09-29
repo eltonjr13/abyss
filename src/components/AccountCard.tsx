@@ -25,7 +25,7 @@ export function AccountCard() {
         </>
       ) : !configured || !googleEnabled ? (
         <p className="mt-3 text-xs leading-relaxed text-white/70">
-          O login com Google estará disponível após concluir a configuração do Google.
+          O login com Google não está disponível nesta versão.
         </p>
       ) : (
         <>

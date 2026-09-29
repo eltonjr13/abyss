@@ -40,8 +40,8 @@ Esta extensão oferece uma **experiência rápida de foco** diretamente na barra
 
 1. Execute o build da aplicação:
    ```bash
-   npm run build
+   npm run build:extension
    ```
-2. Monte uma pasta de distribuição com o **conteúdo** de `extension` na raiz (incluindo `manifest.json` e `icons/`) e `dist/` dentro dela. Compacte o conteúdo dessa pasta em um `.zip` com `manifest.json` na raiz.
+2. Monte uma pasta de distribuição com o **conteúdo** de `extension` na raiz (incluindo `manifest.json` e `icons/`) e `dist/` dentro dela. Compacte o conteúdo dessa pasta em um `.zip` com `manifest.json` na raiz. Este build desativa o login Google dentro da extensão até que o retorno OAuth da extensão esteja configurado e testado.
 3. Acesse o [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
 4. Faça upload do arquivo `.zip` e configure descrições e capturas reais conforme `docs/store-listings.md`. Depois da publicação, use o endereço da listagem como destino do botão principal em `mergulhe.cloud`.
