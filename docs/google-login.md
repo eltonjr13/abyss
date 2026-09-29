@@ -7,12 +7,15 @@ O app continua utilizável sem conta. Entrar com Google cria um usuário no Supa
 - Projeto Supabase dedicado: **abyss**, organização **eltonjr13's Org**, referência `ukzixtqsdybeqrwsybqt`.
 - A migração `20260928230052_tide_user_profiles.sql` foi aplicada pelo SQL Editor. Verificação no banco: RLS ativo, duas políticas, `anon` sem leitura, `authenticated` com leitura e inserção, sem atualização.
 - Site URL `http://localhost:5173`; redirects `http://localhost:5173/**`, `http://127.0.0.1:5173/**` e `com.tide.oceanfocus://auth/callback` cadastrados.
-- `.env.local` contém apenas a URL e a chave publishable do projeto, está ignorado pelo Git e mantém `VITE_GOOGLE_AUTH_ENABLED=false` até o Google estar configurado. O provedor Email foi desativado no Supabase; Google ainda está desativado.
+- O Google Cloud usa o projeto **TIDE Ocean Focus** (`tide-ocean-focus`) e o cliente OAuth web **TIDE via Supabase**, com callback `https://ukzixtqsdybeqrwsybqt.supabase.co/auth/v1/callback`. A tela de consentimento está em modo **Testando** e tem a conta do proprietário como usuária de teste.
+- No Supabase, Google está habilitado com o Client ID e o Client Secret desse cliente OAuth. Email e Phone estão desabilitados. O Client Secret foi cadastrado apenas no painel do Supabase e não está no repositório.
+- `.env.local` contém a URL e a chave publishable do projeto, está ignorado pelo Git e usa `VITE_GOOGLE_AUTH_ENABLED=true` no ambiente local.
+- Em 28/09/2026, o login web em `http://127.0.0.1:5173/` retornou ao TIDE com a conta Google. O usuário apareceu em Supabase Auth e o registro correspondente foi confirmado em `public.profiles`.
 - Como a migração foi executada no SQL Editor, ela não consta automaticamente no histórico do CLI. Antes do primeiro `supabase db push`, vincule o projeto e reconcilie esse histórico com `supabase migration repair --linked --status applied 20260928230052`.
 
-## Ativar em um projeto Supabase exclusivo do TIDE
+## Reproduzir a configuração em outro ambiente
 
-1. Crie o projeto na organização escolhida para o TIDE. Não use um banco de outro produto.
+1. Crie um projeto Supabase exclusivo para o TIDE. Não use um banco de outro produto.
 2. Aplique `supabase/migrations/20260928230052_tide_user_profiles.sql` pelo fluxo de migrações do Supabase. A tabela tem RLS: cada conta autenticada só pode ler e criar a própria linha.
 3. No Google Cloud Console, configure a tela de consentimento OAuth e crie um **OAuth Client ID do tipo Web application**. Em *Authorized redirect URIs*, informe exatamente `https://<project-ref>.supabase.co/auth/v1/callback` (o callback exibido pelo Supabase). Enquanto a tela de consentimento estiver em modo de teste, adicione as contas de teste no Google Cloud.
 4. Em Supabase → Authentication → Providers → Google, habilite Google e informe Client ID e Client Secret. Desabilite os provedores de login por e-mail, telefone e outros que não serão oferecidos nesta fase. O **Client Secret fica apenas no painel do Supabase**.
@@ -28,4 +31,4 @@ O código já abre a autenticação no navegador do sistema e recebe o retorno `
 - iOS: em `ios/App/App/Info.plist`, adicione `CFBundleURLTypes` com `CFBundleURLSchemes` contendo `com.tide.oceanfocus`.
 - Depois de sincronizar os plugins (`npx cap sync`), valide em aparelhos Android e iOS o retorno do Google, a persistência da sessão após fechar o app e a saída da conta.
 
-Ainda faltam as credenciais OAuth do Google, a URL web de produção e os projetos nativos para validar o login completo. Para publicar no iOS, também é necessário planejar uma opção de login equivalente que atenda à [diretriz 4.8 da Apple](https://developer.apple.com/app-store/review/guidelines/), além do fluxo de exclusão de conta.
+Para abrir o login a outras pessoas, é preciso concluir o branding do OAuth e publicar a tela de consentimento no Google Cloud, além de cadastrar a URL web de produção no Supabase. Os projetos nativos e seus redirects ainda precisam ser gerados e testados em Android e iOS. Para publicar no iOS, também é necessário planejar uma opção de login equivalente que atenda à [diretriz 4.8 da Apple](https://developer.apple.com/app-store/review/guidelines/), além do fluxo de exclusão de conta.
