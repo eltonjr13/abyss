@@ -4,6 +4,7 @@ import { Capacitor } from "@capacitor/core";
 import { App } from "@capacitor/app";
 import { Browser } from "@capacitor/browser";
 import { supabase } from "./client";
+import { extensionChrome } from "../platform/chrome";
 
 const nativeRedirect = "cloud.mergulhe.app://auth/callback";
 
@@ -52,8 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data: sessionData, error: sessionError } = await client.auth.getSession();
       if (!active || current !== sequence) return;
       if (sessionError || !sessionData.session) {
-        setUser(null);
-        setProfile(null);
+        if (!sessionError) { setUser(null); setProfile(null); }
         setError(sessionError ? "Não foi possível verificar sua conta. Tente novamente com internet." : null);
         setLoading(false);
         return;
@@ -62,8 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error: authError } = await client.auth.getUser();
       if (!active || current !== sequence) return;
       if (authError || !data.user) {
-        setUser(null);
-        setProfile(null);
+        // Keep the cached account while offline; never turn its timer into a guest timer.
+        setUser(sessionData.session.user);
         setError(authError ? "Não foi possível verificar sua conta. Tente novamente com internet." : null);
         setLoading(false);
         return;
@@ -110,10 +110,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Wait until Supabase releases its auth lock before querying Auth/PostgREST.
       setTimeout(() => { if (active) void refresh(); }, 0);
     });
+    const chrome = extensionChrome();
+    const reconnect = () => { if (active) void refresh(); };
+    const visible = () => { if (!document.hidden) reconnect(); };
+    window.addEventListener("online", reconnect);
+    document.addEventListener("visibilitychange", visible);
+    const storageChanged = (changes: Record<string, unknown>) => {
+      if (Object.keys(changes).some((key) => key.endsWith("-auth-token"))) void refresh();
+    };
+    chrome?.storage.onChanged.addListener(storageChanged);
 
     return () => {
       active = false;
       subscription.unsubscribe();
+      chrome?.storage.onChanged.removeListener(storageChanged);
+      window.removeEventListener("online", reconnect);
+      document.removeEventListener("visibilitychange", visible);
     };
   }, []);
 
@@ -158,6 +170,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!supabase || !googleEnabled) return;
     setBusy(true);
     setError(null);
+    const chrome = extensionChrome();
+    if (chrome) {
+      try {
+        const result = await chrome.runtime.sendMessage({ type: "mergulhe:login" });
+        if (result.error) setError(result.error);
+      } catch { setError("Não foi possível entrar com Google na extensão."); }
+      setBusy(false);
+      return;
+    }
     const native = Capacitor.isNativePlatform();
     const { data, error: signInError } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -182,7 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!supabase) return;
     setBusy(true);
     setError(null);
-    const { error: signOutError } = await supabase.auth.signOut();
+    const { error: signOutError } = await supabase.auth.signOut({ scope: "local" });
     if (signOutError) setError("Não foi possível sair da conta. Tente novamente.");
     setBusy(false);
   }

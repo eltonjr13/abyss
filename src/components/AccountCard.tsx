@@ -1,7 +1,9 @@
 import { useAuth } from "../auth/AuthContext";
+import { useGame } from "../game/GameContext";
 
 export function AccountCard() {
   const { configured, googleEnabled, loading, busy, user, profile, error, signInWithGoogle, signOut } = useAuth();
+  const { syncMessage } = useGame();
 
   return (
     <section className="mt-8 rounded-lg border border-white/15 bg-[#071018]/70 p-4" aria-label="Conta">
@@ -44,7 +46,8 @@ export function AccountCard() {
       )}
       {error && <p className="mt-3 text-xs text-rose-300" role="alert">{error}</p>}
       <p className="mt-4 text-[10px] leading-relaxed text-white/50">
-        Seu progresso ainda fica neste dispositivo. Entrar na conta não sincroniza o oceano.
+        {user ? syncMessage : "Entre com a mesma conta no celular e na extensão para conectar o timer."}
+        {" "}O progresso do oceano permanece neste dispositivo.
       </p>
     </section>
   );

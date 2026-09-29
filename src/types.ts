@@ -143,4 +143,6 @@ export interface ActiveSession {
   elapsedMs: number;
   startedAt: number | null;
   quote: string;
+  sharedUserId?: string;
+  revision?: number;
 }

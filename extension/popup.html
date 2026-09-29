@@ -90,6 +90,10 @@
       background: rgba(255,255,255,0.1);
       color: rgba(255,255,255,0.7);
     }
+    [hidden] { display: none !important; }
+    button:disabled { opacity: .45; cursor: wait; }
+    .account { font-size: 11px; color: rgba(255,255,255,.7); overflow-wrap: anywhere; margin-bottom: 10px; }
+    .sync-status { font-size: 11px; line-height: 1.5; color: rgba(255,255,255,.6); margin-bottom: 12px; }
   </style>
 </head>
 <body>
@@ -98,24 +102,30 @@
     <span id="badge" class="status-badge">Pronto</span>
   </div>
 
+  <p id="account" class="account">Conecte sua conta</p>
+  <p id="sync-status" class="sync-status" role="status">Entre com a mesma conta Google usada no celular.</p>
+  <button id="btn-login" class="btn-main">Entrar com Google</button>
+  <button id="btn-logout" class="btn-ocean" hidden>Sair desta conta</button>
+
   <div class="timer-display">
     <div id="time" class="time">25:00</div>
     <div id="quote" class="quote">O oceano aguarda sua presença.</div>
   </div>
 
-  <div id="setup-controls" class="grid">
+  <div id="setup-controls" class="grid" hidden>
     <button data-mins="15">15 MIN</button>
     <button data-mins="25">25 MIN</button>
     <button data-mins="45">45 MIN</button>
+    <button data-mins="0">SEM TIMER</button>
   </div>
 
-  <div id="active-controls" style="display: none;">
+  <div id="active-controls" hidden>
     <button id="btn-pause" class="btn-main">PAUSAR</button>
     <button id="btn-finish" class="btn-main" style="border-color: rgba(255,255,255,0.2); background: transparent;">CONCLUIR SESSÃO</button>
   </div>
 
   <button id="btn-open-ocean" class="btn-ocean">🌊 Ver o Oceano Completo</button>
 
-  <script src="popup.js"></script>
+  <script type="module" src="generated/popup.js"></script>
 </body>
 </html>

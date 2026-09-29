@@ -3,14 +3,18 @@ import type { ActiveSession, AudioSettings, BiomeId, GameState, Rewards } from "
 import { applySession } from "./progress";
 import { freshState, loadSnapshot, refreshDay } from "./save";
 import { createSession, elapsedSeconds, MIN_REWARD_SECONDS, pauseSessionAt, resumeSessionAt } from "./session";
+import { isActive, sessionFromRow, type FocusSnapshot } from "../focus/shared";
 
 export interface GameData {
   state: GameState;
   session: ActiveSession | null;
   rewards: Rewards | null;
+  appliedSharedSessions?: string[];
 }
 
 export type GameAction =
+  | { type: "shared"; snapshot: FocusSnapshot; userId: string; now: number }
+  | { type: "detach_shared" }
   | { type: "onboarding" }
   | { type: "biome"; id: BiomeId }
   | { type: "start"; seconds: number | null; quote: string; now: number }
@@ -41,6 +45,36 @@ function seededRandom(seed: number): () => number {
 
 export function gameReducer(data: GameData, action: GameAction): GameData {
   switch (action.type) {
+    case "detach_shared":
+      return data.session?.sharedUserId ? { ...data, session: null, rewards: null } : data;
+    case "shared": {
+      // Finish a pre-existing guest session locally before joining the account timer.
+      if (data.session && !data.session.sharedUserId) return data;
+      let state = data.state;
+      let rewards = data.rewards;
+      const applied = new Set(data.appliedSharedSessions ?? []);
+      for (const row of action.snapshot.completed) {
+        if (row.user_id !== action.userId || row.status !== "completed" || !row.completed_at || applied.has(row.id)) continue;
+        applied.add(row.id);
+        const seconds = Math.floor(Number(row.elapsed_ms) / 1000);
+        if (seconds < MIN_REWARD_SECONDS) continue;
+        const seed = [...row.id].reduce((value, char) => Math.imul(value, 31) + char.charCodeAt(0), 0);
+        const day = todayKey(new Date(row.completed_at));
+        const result = applySession(state, row.biome, seconds, day, seededRandom(seed));
+        if (state.lastSessionDate && day < state.lastSessionDate) {
+          // Late delivery of older completions must preserve today's existing streak/count.
+          result.state.lastSessionDate = state.lastSessionDate;
+          result.state.streak = state.streak;
+          result.state.todayDate = state.todayDate;
+          result.state.todayFocusSeconds = state.todayFocusSeconds;
+        }
+        state = result.state;
+        rewards = result.rewards;
+      }
+      const row = action.snapshot.row;
+      const session = isActive(row) && row.user_id === action.userId ? sessionFromRow(row, action.snapshot.offset) : null;
+      return { state: refreshDay(state, todayKey(new Date(action.now))), session, rewards, appliedSharedSessions: [...applied] };
+    }
     case "onboarding":
       return { ...data, state: { ...data.state, seenOnboarding: true } };
     case "biome":
@@ -75,7 +109,7 @@ export function gameReducer(data: GameData, action: GameAction): GameData {
         today,
         seededRandom(Number(session.id) ^ action.now),
       );
-      return { state: refreshDay(state, todayKey(new Date(action.now))), rewards, session: null };
+      return { ...data, state: refreshDay(state, todayKey(new Date(action.now))), rewards, session: null };
     }
     case "abandon":
       return { ...data, session: null, rewards: null };
@@ -83,6 +117,7 @@ export function gameReducer(data: GameData, action: GameAction): GameData {
       return { ...data, state: { ...data.state, audio: action.audio } };
     case "reset":
       return {
+        ...data,
         state: {
           ...freshState(action.now),
           seenOnboarding: true,

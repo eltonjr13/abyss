@@ -1,6 +1,6 @@
 # Contas Mergulhe: Google e perfil básico
 
-O app continua utilizável sem conta. Entrar com Google cria um usuário no Supabase Auth e uma linha em `public.profiles` com `id`, nome de exibição e data de criação. O e-mail permanece no Auth; o progresso do oceano continua no dispositivo e **não é sincronizado pelo login**.
+O app continua utilizável sem conta. Entrar com Google cria um usuário no Supabase Auth e uma linha em `public.profiles` com `id`, nome de exibição e data de criação. O e-mail permanece no Auth. Na versão 1.1, a conta conecta o timer ao celular e à extensão; o progresso completo do oceano continua no dispositivo. Veja `docs/shared-focus.md`.
 
 ## Estado atual
 
@@ -33,4 +33,4 @@ O código já abre a autenticação no navegador do sistema e espera o retorno `
 
 Para abrir o login a outras pessoas, é preciso concluir o branding do OAuth com `https://mergulhe.cloud`, páginas públicas de privacidade e termos, verificar o domínio e publicar a tela de consentimento no Google Cloud. O callback do cliente Google continua sendo o URL do Supabase; a landing page não substitui esse callback. O redirect Android foi cadastrado no Supabase e ainda precisa ser testado em aparelho; o projeto iOS ainda precisa ser gerado. Para publicar no iOS, também é necessário planejar uma opção de login equivalente que atenda à [diretriz 4.8 da Apple](https://developer.apple.com/app-store/review/guidelines/), além do fluxo de exclusão de conta.
 
-O build `npm run build:extension` desativa o login Google apenas dentro da extensão: ainda não há um redirect OAuth da extensão publicado e testado. O app completo empacotado nela continua utilizável sem conta, e o progresso fica no armazenamento local da extensão.
+O build `npm run build:extension` inclui o login Google pelo worker da extensão e compartilha sua sessão com o popup e o oceano. Em 29/09/2026, o callback exato `https://kgjfmiccmbjnabmjknmgodickdhkbpji.chromiumapp.org/auth/callback` foi configurado no Supabase. O login da extensão ainda precisa do teste no Chrome real; o usuário já validou o login do APK 1.0 no celular. Consulte `extension/README.md` para gerar e carregar a versão 1.1.

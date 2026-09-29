@@ -6,10 +6,11 @@ import { formatTimer } from "../lib/format";
 import { notifySessionComplete, requestNotificationPermission } from "../lib/notifications";
 
 export function Focus() {
-  const { session, pauseSession, resumeSession, completeSession, abandonSession } = useGame();
+  const { session, pauseSession, resumeSession, completeSession, abandonSession, syncBusy, syncMessage } = useGame();
   const [now, setNow] = useState(() => Date.now());
   const doneRef = useRef(false);
   const paused = session?.startedAt === null;
+  useEffect(() => { doneRef.current = false; }, [session?.id]);
 
   useEffect(() => {
     const sync = () => setNow(Date.now());
@@ -50,11 +51,11 @@ export function Focus() {
   }, []);
 
   useEffect(() => {
-    if (!session || !biome || planned === null || remaining !== 0 || doneRef.current) return;
+    if (!session || !biome || planned === null || remaining !== 0 || doneRef.current || syncBusy) return;
     doneRef.current = true;
     notifySessionComplete(biome.name, Math.round((planned ?? elapsed) / 60));
     completeSession();
-  }, [session, planned, remaining, completeSession, biome, elapsed]);
+  }, [session, planned, remaining, completeSession, biome, elapsed, syncBusy]);
 
   useEffect(() => {
     document.title = session
@@ -87,15 +88,18 @@ export function Focus() {
       </div>
 
       <div className="flex w-full max-w-xs flex-col items-center gap-3">
+        {syncMessage && <p className="text-center text-xs text-white/55" role="status">{syncMessage}</p>}
         {paused && <p className="font-serif text-sm text-white/60 italic">O tempo está em suspenso.</p>}
         <button
           onClick={paused ? resumeSession : pauseSession}
+          disabled={Boolean(session.sharedUserId && syncBusy)}
           className="min-h-12 w-full border border-white/30 px-5 py-3 text-[11px] tracking-[0.28em] text-white/85 uppercase hover:border-white/50"
         >
           {paused ? "Retomar" : "Pausar"}
         </button>
         <button
           onClick={end}
+          disabled={Boolean(session.sharedUserId && syncBusy)}
           className="min-h-11 px-4 text-[11px] tracking-[0.18em] text-white/60 uppercase hover:text-white/85"
         >
           {canEarn ? "Encerrar sessão" : "Descartar sessão"}

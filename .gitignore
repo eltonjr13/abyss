@@ -6,4 +6,6 @@ coverage/
 .env.local
 .env.*.local
 builds/
+extension/dist/
+extension/generated/
 .android-user/

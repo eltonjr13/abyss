@@ -29,8 +29,10 @@ O Gradle gera `android/app/build/outputs/apk/debug/app-debug.apk`; a última lin
 
 Copie o APK para o Android e abra o arquivo no aparelho, autorizando a instalação dessa origem quando solicitado. Com depuração USB ativada, também é possível instalar por `adb install -r android/app/build/outputs/apk/debug/app-debug.apk`.
 
-Valide a abertura, o cronômetro de foco, pausa e retomada ao minimizar, persistência do progresso após fechar e abrir, e a entrada e saída com Google. O login deve voltar do navegador para o Mergulhe; confira que a conta aparece na tela Perfil. O progresso permanece local ao dispositivo e não é sincronizado pelo login.
+Valide a abertura, o cronômetro de foco, pausa e retomada ao minimizar, persistência do progresso após fechar e abrir, e a entrada e saída com Google. O login deve voltar do navegador para o Mergulhe; confira que a conta aparece na tela Perfil. Na versão 1.1, o timer da conta é compartilhado com a extensão; o progresso completo do oceano permanece local ao dispositivo. Veja `docs/shared-focus.md`.
 
 O APK de depuração é assinado automaticamente com uma chave local de desenvolvimento em `.android-user/debug.keystore` (ignorada pelo Git). Guarde essa chave para atualizar o app instalado sem reinstalar; uma chave diferente pode exigir desinstalar o app e perder dados locais. Preserve uma chave de lançamento separada quando houver uma versão de distribuição. Um build de iOS, assinatura de produção e envio às lojas são etapas futuras.
 
 Em 29/09/2026, o build `assembleDebug` foi concluído e a assinatura foi verificada. O aparelho não estava conectado por USB, então abertura, desempenho e login Google ainda dependem de teste físico.
+
+O usuário validou o APK 1.0 e o login Google no celular. O APK 1.1 adiciona o timer da conta: instale-o como atualização usando a mesma assinatura e entre com a mesma conta Google na extensão. O artefato desta etapa é `builds/Mergulhe-v1.1-android-teste.apk`.

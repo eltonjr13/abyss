@@ -1,19 +1,23 @@
 {
   "manifest_version": 3,
+  "minimum_chrome_version": "120",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkWr+m3rsaQ4hgSyGxRElbcgLireEBvZt6yzoV3y2tBhndRyzTixOn9vPg0pr7yIF/QzAhr87d6Cp+tfLpyC2SGuE153vt8CBlUK8ZtxxsohQYdchtCGjlODNK39XyA2Mc7cunrZvWBjRkdxiJrEVguaknAHEFekSm3jjIPoZj5uvQSKdOc9p/yosUsosIVMIqZOaV8kfMr5negBLjmHM/u69JjwS8BSBmhA9zFvU22eT0x7kvPC9V2S+x9ZeDPIqQE5+gUmaSBneM9w+zygpbDsiijW1jRhEx9wpCTI06DnZ5K4zoQEqc7qw22dRFsxReuidSxSnc4g4YNYfDk2wyQIDAQAB",
   "name": "Mergulhe — foco e oceano",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Cronômetro de foco com um oceano virtual que ganha vida conforme você se concentra.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": ["storage", "alarms", "notifications"],
+  "permissions": ["storage", "alarms", "notifications", "identity"],
+  "host_permissions": ["https://ukzixtqsdybeqrwsybqt.supabase.co/*"],
   "action": {
     "default_popup": "popup.html",
     "default_title": "Mergulhe: foco rápido"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "generated/background.js",
+    "type": "module"
   }
 }

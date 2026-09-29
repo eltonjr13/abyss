@@ -18,6 +18,7 @@ export const DEFAULT_PLUS: PlusEntitlement = {
 export interface SaveSnapshot {
   state: GameState;
   session: ActiveSession | null;
+  appliedSharedSessions?: string[];
 }
 
 export const INITIAL: GameState = {
@@ -167,7 +168,7 @@ function hydratePlus(raw: unknown, now: number): PlusEntitlement {
 
 function hydrateSession(raw: unknown, state: GameState, now: number): ActiveSession | null {
   const source = record(raw);
-  if (!biomeId(source.biome) || !state.unlockedBiomes.includes(source.biome)) return null;
+  if (!biomeId(source.biome) || (!source.sharedUserId && !state.unlockedBiomes.includes(source.biome))) return null;
   if (typeof source.id !== "string" || typeof source.quote !== "string") return null;
   const plannedSeconds = source.plannedSeconds;
   if (plannedSeconds !== null &&
@@ -183,6 +184,8 @@ function hydrateSession(raw: unknown, state: GameState, now: number): ActiveSess
     elapsedMs: Math.min(nonNegative(source.elapsedMs), 7 * 24 * 60 * 60 * 1000),
     startedAt: startedAt === null ? null : Math.min(startedAt as number, now),
     quote: source.quote,
+    ...(typeof source.sharedUserId === "string" && Number.isInteger(source.revision)
+      ? { sharedUserId: source.sharedUserId, revision: source.revision as number } : {}),
   };
 }
 
@@ -193,7 +196,9 @@ export function loadSnapshot(now = Date.now()): SaveSnapshot {
       const parsed = record(JSON.parse(saved));
       if (parsed.version === 2) {
         const state = hydrate(parsed.state, now);
-        return { state, session: hydrateSession(parsed.session, state, now) };
+        return { state, session: hydrateSession(parsed.session, state, now),
+          appliedSharedSessions: Array.isArray(parsed.appliedSharedSessions)
+            ? parsed.appliedSharedSessions.filter((id): id is string => typeof id === "string") : [] };
       }
     }
     const legacy = localStorage.getItem(LEGACY_KEY);

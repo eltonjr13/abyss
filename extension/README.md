@@ -1,47 +1,43 @@
-# Mergulhe — Extensão Google Chrome (Manifest V3)
+# Mergulhe 1.1 — extensão Chrome
 
-Esta extensão oferece uma **experiência rápida de foco** diretamente na barra de ferramentas do Google Chrome, mantendo o timer **completamente independente** da janela do popup e abrindo o app Mergulhe empacotado na extensão em "Ver o Oceano". As sessões do timer rápido não atualizam automaticamente o progresso do app completo.
+O popup, a aba “Ver o Oceano” e o app Android usam uma sessão de foco por conta. Entre com a mesma conta Google nos dois aparelhos. Início, pausa, retomada e término são confirmados pelo Supabase; o relógio é calculado pelos horários da sessão.
 
----
+## Gerar e carregar
 
-## 🌊 Funcionalidades
+1. Configure `.env.local` conforme `.env.example`, usando apenas URL e chave publishable. Defina `VITE_GOOGLE_AUTH_ENABLED=true`.
+2. Execute `npm run build:extension`. O comando gera `extension/dist/` e `extension/generated/`.
+3. Abra `chrome://extensions`, ative o modo de desenvolvedor e carregue a pasta `extension/` sem compactação. Se ela já estiver carregada, clique em atualizar.
+4. Entre com Google pelo popup. Use a mesma conta do APK 1.1. O APK 1.0 mantém o timer local e precisa ser atualizado para conectar os timers.
 
-1. **Timer Independente (Background Service Worker)**:
-   - O cronômetro utiliza a API nativa `chrome.alarms` e `chrome.storage.local`.
-   - Se você fechar o popup, o timer **continua rodando com precisão**.
-   - O tempo restante em minutos é exibido no **badge do ícone** da extensão (ex: `24m`, `15m`, `✓`).
-2. **Notificações Nativas do Sistema**:
-   - Quando o tempo encerra, o Chrome emite uma notificação nativa avisando sobre a conclusão do timer rápido.
-3. **Modo Rápido de Foco**:
-   - Início com 1 clique (15 min, 25 min, 45 min).
-   - Pausa e retomada sem perda de tempo decorrido.
-4. **Modo "Ver o Oceano"**:
-   - Botão para abrir o Mergulhe em tela cheia numa nova aba, permitindo contemplar os biomas, peixes e paisagens sonoras completas.
+O `key` público no manifesto fixa o ID de desenvolvimento em `kgjfmiccmbjnabmjknmgodickdhkbpji`. O callback permitido no Supabase é:
 
----
+```text
+https://kgjfmiccmbjnabmjknmgodickdhkbpji.chromiumapp.org/auth/callback
+```
 
-## 🛠️ Como Carregar no Google Chrome (Modo Desenvolvedor)
+O Google continua usando o provider e o callback do Supabase já configurados. A extensão usa PKCE e `chrome.identity.launchWebAuthFlow`; não lê a conta do perfil do Chrome. Os tokens ficam em `chrome.storage.local`, restrito aos contextos da própria extensão. As páginas e o worker usam o mesmo armazenamento e um bloqueio entre contextos para renovar a sessão com a versão atual do SDK.
 
-1. No Chrome, abra a barra de endereços e acesse:
-   ```text
-   chrome://extensions
-   ```
-2. No canto superior direito, ative a chave **"Modo do desenvolvedor"** (Developer mode).
-3. Clique no botão **"Carregar sem compactação"** (Load unpacked).
-4. Selecione a pasta deste projeto:
-   ```text
-   abyss/extension
-   ```
-5. Pronto! O ícone do Mergulhe aparecerá na sua barra de extensões. Fixe-o na barra de ferramentas para acesso rápido.
+## Popup fechado e falta de internet
 
----
+- Com o popup aberto, Realtime atualiza a sessão e uma consulta a cada 30 segundos recupera mudanças perdidas.
+- Com o popup fechado, `chrome.alarms` consulta a conta a cada minuto. O horário de término também recebe um alarme próprio.
+- Ao reiniciar o Chrome, os alarmes são reconstruídos e o estado é consultado novamente.
+- Computador suspenso, Chrome fechado e falta de internet podem atrasar atualizações e notificações. O horário confirmado permite recuperar o relógio ao voltar.
+- Offline, o último timer continua sendo exibido; comandos exigem uma nova confirmação do servidor. O badge `!` indica sincronização indisponível.
+- Sair da conta limpa o cache e os alarmes da extensão, mantendo a sessão da conta disponível no celular.
 
-## 📦 Como Publicar na Chrome Web Store
+Os botões de 15, 25, 45 minutos e “Sem timer” iniciam a sessão da conta. Não há um segundo cronômetro independente. Uma sessão antiga do app, iniciada sem conta, pode ser finalizada localmente antes de usar a sessão compartilhada.
 
-1. Execute o build da aplicação:
-   ```bash
-   npm run build:extension
-   ```
-2. Monte uma pasta de distribuição com o **conteúdo** de `extension` na raiz (incluindo `manifest.json` e `icons/`) e `dist/` dentro dela. Compacte o conteúdo dessa pasta em um `.zip` com `manifest.json` na raiz. Este build desativa o login Google dentro da extensão até que o retorno OAuth da extensão esteja configurado e testado.
-3. Acesse o [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
-4. Faça upload do arquivo `.zip` e configure descrições e capturas reais conforme `docs/store-listings.md`. Depois da publicação, use o endereço da listagem como destino do botão principal em `mergulhe.cloud`.
+As conclusões são registradas por ID e aplicadas uma vez em cada instalação do app. A sincronização completa do oceano e a validação de compras continuam sendo etapas próprias; o timer não copia nem concede Plus.
+
+## Verificar e distribuir para teste
+
+```sh
+npm run typecheck
+npm test
+npm run test:extension
+```
+
+O último comando compila a extensão e simula reinício do worker, alarmes, pausa, falta de internet, notificação e saída da conta. Ele não substitui o teste de Google OAuth e de sincronização em Chrome real com um celular.
+
+Para distribuir, compacte `manifest.json`, `popup.html`, `icons/`, `generated/` e `dist/`, com o manifesto na raiz do ZIP. Publicação na Chrome Web Store exige revisar o ID definitivo e permitir somente seu callback correspondente.

@@ -5,7 +5,7 @@ import { DURATIONS } from "../game/progress";
 import { cn } from "../utils/cn";
 
 export function Setup() {
-  const { state, startSession } = useGame();
+  const { state, startSession, syncBusy, syncMessage } = useGame();
   const biome = BIOMES[state.currentBiome];
   const [choice, setChoice] = useState<number | "untimed" | "custom">(25 * 60);
   const [custom, setCustom] = useState(20);
@@ -91,10 +91,12 @@ export function Setup() {
 
         <button
           onClick={begin}
+          disabled={syncBusy}
           className="mt-8 min-h-12 w-full border border-white/25 bg-white/5 py-4 text-[13px] tracking-[0.3em] text-[var(--foam)] uppercase hover:border-white/50 sm:tracking-[0.42em]"
         >
           Descer
         </button>
+        {syncMessage && <p className="mt-3 text-xs text-white/55" role="status">{syncMessage}</p>}
       </div>
     </div>
   );
