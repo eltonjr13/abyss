@@ -36,7 +36,7 @@ export function Explore() {
           src={IMAGES.map}
           alt="Mapa do oceano"
           className="block w-full"
-          style={{ imageRendering: "pixelated" }}
+          style={{ imageRendering: "auto" }}
         />
         {HOTSPOTS.map((h) => {
           const unlocked = state.unlockedBiomes.includes(h.id);

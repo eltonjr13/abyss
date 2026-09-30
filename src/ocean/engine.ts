@@ -11,6 +11,7 @@ export interface OceanConfig {
   life: number;
   timeOfDay: TimeOfDay;
   intensity: number;
+  showCreatures?: boolean;
 }
 
 interface Fish {
@@ -94,21 +95,6 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 const imageCache = new Map<string, HTMLImageElement>();
-const pixelCache = new Map<string, HTMLCanvasElement>();
-
-function pixelate(img: HTMLImageElement, w: number, h: number): HTMLCanvasElement {
-  const key = `${img.src}|${w}|${h}`;
-  const hit = pixelCache.get(key);
-  if (hit) return hit;
-  const c = document.createElement("canvas");
-  c.width = w;
-  c.height = h;
-  const ctx = c.getContext("2d")!;
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(img, 0, 0, w, h);
-  pixelCache.set(key, c);
-  return c;
-}
 
 export class OceanEngine {
   private canvas: HTMLCanvasElement;
@@ -173,6 +159,9 @@ export class OceanEngine {
       this.loadingImages = false;
     }
     this.composeBackground();
+    // A habitat selected during an in-flight load still needs its own scenery.
+    const currentSources = getBiomeImageSources(this.config.biome, this.config.timeOfDay);
+    if (this.running && currentSources.join("|") !== needed.join("|")) await this.ensureBiomeImages();
   }
 
   setConfig(partial: Partial<OceanConfig>) {
@@ -180,11 +169,12 @@ export class OceanEngine {
     const biomeChanged = next.biome !== this.config.biome;
     const lifeChanged = Math.abs(next.life - this.config.life) > 0.5;
     const todChanged = next.timeOfDay !== this.config.timeOfDay;
+    const creaturesChanged = next.showCreatures !== this.config.showCreatures;
     this.config = next;
     if (biomeChanged || todChanged) {
       void this.ensureBiomeImages();
     }
-    if (biomeChanged || lifeChanged || todChanged) this.rebuild();
+    if (biomeChanged || lifeChanged || todChanged || creaturesChanged) this.rebuild();
     else if (!this.bgCanvas) this.composeBackground();
   }
 
@@ -269,7 +259,7 @@ export class OceanEngine {
     const eligible = SPECIES.filter((s) => s.biome === biome && life >= s.minLife);
     const extras = SPECIES.filter((s) => s.biome === biome && life >= s.minLife * 0.7);
     const pool = eligible.length ? eligible : extras.slice(0, 2);
-    const fishCount = Math.floor(2 + (life / 100) * (night ? 10 : 16));
+    const fishCount = this.config.showCreatures === false ? 0 : Math.floor(2 + (life / 100) * (night ? 10 : 16));
     this.fish = [];
     for (let i = 0; i < fishCount; i++) {
       const spec = pool.length ? pool[Math.floor(rng() * pool.length)]! : SPECIES[0]!;
@@ -398,31 +388,34 @@ export class OceanEngine {
     const get = (src: string) => imageCache.get(src) ?? null;
     if (!this.bgCanvas) {
       this.bgCanvas = document.createElement("canvas");
-      this.bgCanvas.width = W;
-      this.bgCanvas.height = H;
+      this.bgCanvas.width = 1920;
+      this.bgCanvas.height = 1080;
     }
+    const bgW = this.bgCanvas.width;
+    const bgH = this.bgCanvas.height;
     const x = this.bgCanvas.getContext("2d")!;
-    x.imageSmoothingEnabled = false;
-    x.clearRect(0, 0, W, H);
+    x.imageSmoothingEnabled = true;
+    x.imageSmoothingQuality = "high";
+    x.clearRect(0, 0, bgW, bgH);
 
     if (biome === "reef") {
       const dead = get(IMAGES.reefDead);
       const alive = get(IMAGES.reefAlive);
       const night = get(IMAGES.reefNight);
       const t = Math.min(1, Math.max(0, life / 100));
-      if (dead) x.drawImage(pixelate(dead, W, H), 0, 0);
+      if (dead) x.drawImage(dead, 0, 0, bgW, bgH);
       else {
         x.fillStyle = "#0b1a24";
-        x.fillRect(0, 0, W, H);
+        x.fillRect(0, 0, bgW, bgH);
       }
       if (alive) {
         x.globalAlpha = 0.15 + t * 0.85;
-        x.drawImage(pixelate(alive, W, H), 0, 0);
+        x.drawImage(alive, 0, 0, bgW, bgH);
         x.globalAlpha = 1;
       }
       if (timeOfDay === "night" && night) {
         x.globalAlpha = 0.55 + (1 - t) * 0.2;
-        x.drawImage(pixelate(night, W, H), 0, 0);
+        x.drawImage(night, 0, 0, bgW, bgH);
         x.globalAlpha = 1;
       }
       return;
@@ -437,11 +430,17 @@ export class OceanEngine {
       abyss: IMAGES.abyss,
     };
     const img = get(map[biome]);
-    if (img) x.drawImage(pixelate(img, W, H), 0, 0);
+    if (img) x.drawImage(img, 0, 0, bgW, bgH);
     else {
       x.fillStyle = BIOMES[biome].palette.deep;
-      x.fillRect(0, 0, W, H);
+      x.fillRect(0, 0, bgW, bgH);
     }
+    // Saturation affects the scenery before the transparent fauna layer.
+    x.save();
+    x.globalCompositeOperation = "saturation";
+    x.fillStyle = `rgba(128,128,128,${0.65 * (1 - life / 100)})`;
+    x.fillRect(0, 0, bgW, bgH);
+    x.restore();
   }
 
   private draw() {
@@ -450,21 +449,10 @@ export class OceanEngine {
     b.imageSmoothingEnabled = false;
     b.clearRect(0, 0, W, H);
 
-    if (this.bgCanvas) b.drawImage(this.bgCanvas, 0, 0, W, H);
-    else {
-      b.fillStyle = BIOMES[biome].palette.deep;
-      b.fillRect(0, 0, W, H);
-    }
-
     const tLife = life / 100;
     if (biome !== "reef") {
       b.fillStyle = `rgba(6, 12, 18, ${0.55 * (1 - tLife)})`;
       b.fillRect(0, 0, W, H);
-      b.save();
-      b.globalCompositeOperation = "saturation";
-      b.fillStyle = `rgba(128,128,128,${0.65 * (1 - tLife)})`;
-      b.fillRect(0, 0, W, H);
-      b.restore();
     }
 
     const todTint: Record<TimeOfDay, string> = {
@@ -538,7 +526,6 @@ export class OceanEngine {
     b.fillRect(W - 8, 0, 8, H);
 
     const out = this.ctx;
-    out.imageSmoothingEnabled = false;
     const cw = this.canvas.width;
     const ch = this.canvas.height;
     const scale = Math.max(cw / W, ch / H);
@@ -546,8 +533,13 @@ export class OceanEngine {
     const dh = H * scale;
     const dx = (cw - dw) / 2;
     const dy = (ch - dh) / 2;
-    out.fillStyle = "#061018";
+    out.fillStyle = BIOMES[biome].palette.deep;
     out.fillRect(0, 0, cw, ch);
+    // Draw the HD plate directly; only sprites/effects use the 480 × 270 buffer.
+    out.imageSmoothingEnabled = true;
+    out.imageSmoothingQuality = "high";
+    if (this.bgCanvas) out.drawImage(this.bgCanvas, dx, dy, dw, dh);
+    out.imageSmoothingEnabled = false;
     out.drawImage(this.buffer, dx, dy, dw, dh);
   }
 

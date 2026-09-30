@@ -20,7 +20,7 @@ export function Onboarding() {
         className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-80"
         style={{
           backgroundImage: `url(${step === 0 ? IMAGES.surface : IMAGES.reefDead})`,
-          imageRendering: "pixelated",
+          imageRendering: "auto",
           filter: step === 0 ? "none" : "saturate(0.7) brightness(0.7)",
         }}
       />

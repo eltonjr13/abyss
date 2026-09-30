@@ -1,0 +1,116 @@
+{
+  "generator": "built-in ImageGen",
+  "delivery": "WebP quality 90, 1920x1080",
+  "assets": [
+    {
+      "id": "reef-alive",
+      "prompt": "Use case: stylized-concept. Asset type: final environment-only background plate for the calm underwater focus game Mergulhe. Create one wide 16:9 image, ideally 1920x1080 or larger, edge-to-edge. Art direction: exquisitely detailed high-resolution pixel art with refined pixel clusters, subtle dithering, rich material texture, layered atmospheric depth and believable underwater light. Polished indie game environment, consistent with animated pixel-art fauna. Not photorealism, not vector illustration, not blurry low-resolution upscaling. Composition: scenery concentrated at the lower third and framing edges, a broad clean expanse of water through the middle for separately animated creatures and UI. No text, letters, logo, frame, HUD or watermark. CRITICAL: ABSOLUTELY NO FAUNA anywhere: no fish, fish silhouettes, turtles, rays, sharks, jellyfish, octopus, crustaceans, starfish, birds, insects, people or animal-shaped details. No schools of fish or tiny decorative animal pixels. Only water, rocks, sand and habitat vegetation; reef structures are environment and may remain. Avoid boats, litter, buildings and fantasy ruins.\nScene: a restored tropical coral reef seen entirely underwater. Teal and turquoise water, pale rippled sand forming a winding channel through the foreground, sculptural reef rock formations and fine branching and plate coral structures concentrated on both lower sides; sea grass along the rock bases. Color accents muted terracotta, sage, ochre and lavender. Shafts of daylight and caustic patterns from the surface, distant rock shelves dissolved into blue. Restrained, elegant, spacious middle. Do not place anemones, sponges, shells, starfish or any recognizable animals.",
+      "asset": "src/assets/images/scenery/reef-alive.webp",
+      "generatedWidth": 1672,
+      "generatedHeight": 941,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 547376,
+      "sha256": "a07f9094c8e774d492a9ec4458b48df429830e92e5c5742577cf0074d92d33a5"
+    },
+    {
+      "id": "kelp",
+      "prompt": "Use case: stylized-concept. Asset type: final environment-only background plate for the calm underwater focus game Mergulhe. Create one wide 16:9 image, ideally 1920x1080 or larger, edge-to-edge. Art direction: exquisitely detailed high-resolution pixel art with refined pixel clusters, subtle dithering, rich material texture, layered atmospheric depth and believable underwater light. Polished indie game environment, consistent with animated pixel-art fauna. Not photorealism, not vector illustration, not blurry low-resolution upscaling. Composition: scenery concentrated at the lower third and framing edges, a broad clean expanse of water through the middle for separately animated creatures and UI. No text, letters, logo, frame, HUD or watermark. CRITICAL: ABSOLUTELY NO FAUNA anywhere: no fish, fish silhouettes, turtles, rays, sharks, jellyfish, octopus, crustaceans, starfish, birds, insects, people or animal-shaped details. No schools of fish or tiny decorative animal pixels. Only water, rocks, sand and habitat vegetation; reef structures are environment and may remain. Avoid boats, litter, buildings and fantasy ruins.\nScene: an underwater kelp forest like a quiet green cathedral. Tall elegant olive and emerald kelp fronds framing the sides, several more distant trunks softened by deep blue-green water, overhead golden-green filtered sun shafts, slate rocks and sand at the bottom. Broad open water corridor centrally. Intricate frond veins and sharp fine pixel clusters, cinematic layered depth. Absolutely no fish or other animals.",
+      "asset": "src/assets/images/scenery/kelp.webp",
+      "generatedWidth": 1672,
+      "generatedHeight": 941,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 501710,
+      "sha256": "98ad4a0a87368901b60ac96069d0c28925966c616551b638bf5bba2698f4d6e4"
+    },
+    {
+      "id": "mangrove",
+      "prompt": "Use case: stylized-concept. Asset type: final environment-only background plate for the calm underwater focus game Mergulhe. Create one wide 16:9 image, ideally 1920x1080 or larger, edge-to-edge. Art direction: exquisitely detailed high-resolution pixel art with refined pixel clusters, subtle dithering, rich material texture, layered atmospheric depth and believable underwater light. Polished indie game environment, consistent with animated pixel-art fauna. Not photorealism, not vector illustration, not blurry low-resolution upscaling. Composition: scenery concentrated at the lower third and framing edges, a broad clean expanse of water through the middle for separately animated creatures and UI. No text, letters, logo, frame, HUD or watermark. CRITICAL: ABSOLUTELY NO FAUNA anywhere: no fish, fish silhouettes, turtles, rays, sharks, jellyfish, octopus, crustaceans, starfish, birds, insects, people or animal-shaped details. No schools of fish or tiny decorative animal pixels. Only water, rocks, sand and habitat vegetation; reef structures are environment and may remain. Avoid boats, litter, buildings and fantasy ruins.\nScene: beneath the waterline of a tranquil mangrove. Sculptural branching brown mangrove roots descending from upper edges and receding in layers, warm tannin-stained jade water, soft amber sun shafts through the canopy, sandy silty riverbed with stones and submerged fallen leaves at the bottom. Open center for animated fauna. Detailed bark, underwater textures, calm spacious atmosphere. Absolutely no fish, crabs, shrimp, birds or any animals.",
+      "asset": "src/assets/images/scenery/mangrove.webp",
+      "generatedWidth": 1672,
+      "generatedHeight": 941,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 544470,
+      "sha256": "2440ddad17cf9fb611c274840b58c2359f2d950abd1cf7681b90e84f9394a8f2"
+    },
+    {
+      "id": "reef-dead",
+      "prompt": "Use case: stylized-concept. Asset type: final environment-only background plate for the calm underwater focus game Mergulhe. Create one wide 16:9 image, ideally 1920x1080 or larger, edge-to-edge. Art direction: exquisitely detailed high-resolution pixel art with refined pixel clusters, subtle dithering, rich material texture, layered atmospheric depth and believable underwater light. Polished indie game environment, consistent with animated pixel-art fauna. Not photorealism, not vector illustration, not blurry low-resolution upscaling. Composition: scenery concentrated at the lower third and framing edges, a broad clean expanse of water through the middle for separately animated creatures and UI. No text, letters, logo, frame, HUD or watermark. CRITICAL: ABSOLUTELY NO FAUNA anywhere: no fish, fish silhouettes, turtles, rays, sharks, jellyfish, octopus, crustaceans, starfish, birds, insects, people or animal-shaped details. No schools of fish or tiny decorative animal pixels. Only water, rocks, sand and habitat vegetation; reef structures are environment and may remain. Avoid boats, litter, buildings and fantasy ruins.\nUse the attached NEW reef image as the exact edit target. Change ONLY the environmental restoration state: the same rocks, same sand channel, same reef shelves, same perspective, same surface wave positions and framing. Make reef branches bleached chalk-gray, remove most seagrass and saturated colorful growth, lightly sedimented rock surfaces, muted cool slate blue water with less clear light. Desolate but clean, no litter painted into the asset because debris is a dynamic game layer. Keep readable structure and detail. Do not move, replace or add any landform. Preserve 16:9, fine textured game art. Still strictly no fish or other fauna.",
+      "asset": "src/assets/images/scenery/reef-dead.webp",
+      "generatedWidth": 1672,
+      "generatedHeight": 941,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 460718,
+      "sha256": "f968a4ccd7392ff77566c99f9e1b9c2a279db091304ce838cb15b7f04d92bb6b"
+    },
+    {
+      "id": "reef-night",
+      "prompt": "Use case: stylized-concept. Asset type: final environment-only background plate for the calm underwater focus game Mergulhe. Create one wide 16:9 image, ideally 1920x1080 or larger, edge-to-edge. Art direction: exquisitely detailed high-resolution pixel art with refined pixel clusters, subtle dithering, rich material texture, layered atmospheric depth and believable underwater light. Polished indie game environment, consistent with animated pixel-art fauna. Not photorealism, not vector illustration, not blurry low-resolution upscaling. Composition: scenery concentrated at the lower third and framing edges, a broad clean expanse of water through the middle for separately animated creatures and UI. No text, letters, logo, frame, HUD or watermark. CRITICAL: ABSOLUTELY NO FAUNA anywhere: no fish, fish silhouettes, turtles, rays, sharks, jellyfish, octopus, crustaceans, starfish, birds, insects, people or animal-shaped details. No schools of fish or tiny decorative animal pixels. Only water, rocks, sand and habitat vegetation; reef structures are environment and may remain. Avoid boats, litter, buildings and fantasy ruins.\nUse the attached NEW reef image as the exact edit target. Change ONLY lighting and time of day: identical rocks, same sand channel, reef shelves, coral branches, perspective and surface wave shapes. Moonlit deep indigo and marine blue water, delicate pale blue moon shafts from the same surface light area, slightly luminous mineral color accents on rock edges and subtle cyan seaweed highlights. Detailed readable dark foreground, quiet nighttime mood, not pitch-black. No floating bioluminescent creatures, no animals, no large neon glowing dots. Preserve 16:9 and every landform.",
+      "asset": "src/assets/images/scenery/reef-night.webp",
+      "generatedWidth": 1672,
+      "generatedHeight": 940,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 488040,
+      "sha256": "4cfdbca78f306fce056de6f1bddd7535057b61e774d48e94349ef3068e142a35"
+    },
+    {
+      "id": "island",
+      "prompt": "Use case: stylized-concept. Asset type: final environment-only background plate for the calm underwater focus game Mergulhe. Create one wide 16:9 image, ideally 1920x1080 or larger, edge-to-edge. Art direction: exquisitely detailed high-resolution pixel art with refined pixel clusters, subtle dithering, rich material texture, layered atmospheric depth and believable underwater light. Polished indie game environment, consistent with animated pixel-art fauna. Not photorealism, not vector illustration, not blurry low-resolution upscaling. Composition: scenery concentrated at the lower third and framing edges, a broad clean expanse of water through the middle for separately animated creatures and UI. No text, letters, logo, frame, HUD or watermark. CRITICAL: ABSOLUTELY NO FAUNA anywhere: no fish, fish silhouettes, turtles, rays, sharks, jellyfish, octopus, crustaceans, starfish, birds, insects, people or animal-shaped details. No schools of fish or tiny decorative animal pixels. Only water, rocks, sand and habitat vegetation; reef structures are environment and may remain. Avoid boats, litter, buildings and fantasy ruins.\nScene: split-level tropical lagoon, a low lush palm island on a distant horizon occupying the upper quarter, pale sunrise clouds, waterline gently rippling across the upper third, clear aquamarine water below with submerged limestone terraces and a wide bright sandy corridor. Fine underwater caustics, sparse reef structures and sea grass confined to lower corners. Spatial depth and fine crisp pixel texture, tranquil refined composition. No birds on trees, no fish below water, no boats or structures.",
+      "asset": "src/assets/images/scenery/island.webp",
+      "generatedWidth": 1672,
+      "generatedHeight": 941,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 569782,
+      "sha256": "000a74b6bf6829070f5e10ebd4d68d2d087c1b34224c114966feee901ffdd679"
+    },
+    {
+      "id": "deep",
+      "prompt": "Use case: stylized-concept. Asset type: final environment-only background plate for the calm underwater focus game Mergulhe. Create one wide 16:9 image, ideally 1920x1080 or larger, edge-to-edge. Art direction: exquisitely detailed high-resolution pixel art with refined pixel clusters, subtle dithering, rich material texture, layered atmospheric depth and believable underwater light. Polished indie game environment, consistent with animated pixel-art fauna. Not photorealism, not vector illustration, not blurry low-resolution upscaling. Composition: scenery concentrated at the lower third and framing edges, a broad clean expanse of water through the middle for separately animated creatures and UI. No text, letters, logo, frame, HUD or watermark. CRITICAL: ABSOLUTELY NO FAUNA anywhere: no fish, fish silhouettes, turtles, rays, sharks, jellyfish, octopus, crustaceans, starfish, birds, insects, people or animal-shaped details. No schools of fish or tiny decorative animal pixels. Only water, rocks, sand and habitat vegetation; reef structures are environment and may remain. Avoid boats, litter, buildings and fantasy ruins.\nScene: the open deep ocean above a distant continental shelf. Vast midnight cobalt-blue water gradient, broad quiet middle, faint remnant surface light far overhead, layered dark slate rock ridges only along the lower corners, a barely visible silty seabed dissolving into depth. Restrained blue volumetric haze, dramatic scale and calm isolation. Still enough high-resolution geological detail to read the edges. No bright stars, no space sky, no glowing creatures, no fish silhouettes or animals.",
+      "asset": "src/assets/images/scenery/deep.webp",
+      "generatedWidth": 1672,
+      "generatedHeight": 941,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 196476,
+      "sha256": "357143c97a839e01e6f1e6ffa7ed09efe20d389701eb44030d716972e010e660"
+    },
+    {
+      "id": "abyss",
+      "prompt": "Use case: stylized-concept. Asset type: final environment-only background plate for the calm underwater focus game Mergulhe. Create one wide 16:9 image, ideally 1920x1080 or larger, edge-to-edge. Art direction: exquisitely detailed high-resolution pixel art with refined pixel clusters, subtle dithering, rich material texture, layered atmospheric depth and believable underwater light. Polished indie game environment, consistent with animated pixel-art fauna. Not photorealism, not vector illustration, not blurry low-resolution upscaling. Composition: scenery concentrated at the lower third and framing edges, a broad clean expanse of water through the middle for separately animated creatures and UI. No text, letters, logo, frame, HUD or watermark. CRITICAL: ABSOLUTELY NO FAUNA anywhere: no fish, fish silhouettes, turtles, rays, sharks, jellyfish, octopus, crustaceans, starfish, birds, insects, people or animal-shaped details. No schools of fish or tiny decorative animal pixels. Only water, rocks, sand and habitat vegetation; reef structures are environment and may remain. Avoid boats, litter, buildings and fantasy ruins.\nScene: abyssal geological canyon on the ocean floor. Monumental jagged basalt walls framing the left and right edges, distant layered stone shelves, black violet and deep blue water, a sandy trench floor at the bottom leading into the central darkness, a few natural hydrothermal stone chimneys in the lower middle producing subtle diffuse pale mineral vapor. Gentle cool reflected rim light reveals rock textures; hints of muted amethyst mineral seams. Spacious nearly empty central water. No corals, no luminous creatures, no jellyfish, no fish, no stars, no fantasy crystals.",
+      "asset": "src/assets/images/scenery/abyss.webp",
+      "generatedWidth": 1672,
+      "generatedHeight": 941,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 268214,
+      "sha256": "8468b0e8028c88bb04d2f6aa24d68ff96a593af237106f61addd0612c0efcc10"
+    },
+    {
+      "id": "surface",
+      "prompt": "Use case: stylized-concept. Asset type: final environment-only background plate for the calm underwater focus game Mergulhe. Create one wide 16:9 image, ideally 1920x1080 or larger, edge-to-edge. Art direction: exquisitely detailed high-resolution pixel art with refined pixel clusters, subtle dithering, rich material texture, layered atmospheric depth and believable underwater light. Polished indie game environment, consistent with animated pixel-art fauna. Not photorealism, not vector illustration, not blurry low-resolution upscaling. Composition: scenery concentrated at the lower third and framing edges, a broad clean expanse of water through the middle for separately animated creatures and UI. No text, letters, logo, frame, HUD or watermark. CRITICAL: ABSOLUTELY NO FAUNA anywhere: no fish, fish silhouettes, turtles, rays, sharks, jellyfish, octopus, crustaceans, starfish, birds, insects, people or animal-shaped details. No schools of fish or tiny decorative animal pixels. Only water, rocks, sand and habitat vegetation; reef structures are environment and may remain. Avoid boats, litter, buildings and fantasy ruins.\nScene: seen underwater looking obliquely upwards toward an empty sunlit ocean surface. Layered ripples and intricate wave caustics in the top third, diffused morning sun beyond the surface, turquoise and teal water graduating to deep blue toward the bottom. A few faraway submerged rock edges low in the corners, broad clean water in the center for onboarding typography. Refined detailed pixel clusters, serene airy light. No horizon island, no bubbles shaped like animals, no fish schools, no birds, no fauna of any size.",
+      "asset": "src/assets/images/scenery/surface.webp",
+      "generatedWidth": 1672,
+      "generatedHeight": 941,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 441658,
+      "sha256": "d6556a88f72143009a13ee974ad726b0db72693e8b4d62c06e39becec2d20e5e"
+    },
+    {
+      "id": "map",
+      "prompt": "Use case: precise-object-edit. Asset type: high-resolution 16:9 scenic navigation map for Mergulhe. Input image is the EXACT EDIT TARGET, an existing six-zone ocean map. Redraw it with much finer, cleaner high-resolution pixel-art textures and rich materials, ideally 1920x1080 or more. Preserve the geography and boundaries in exactly the same relative positions, because invisible app hotspots already depend on this layout: mangrove land and roots at upper-left/left (center 16% x, 35% y), kelp underwater forest lower-left (22% x, 73% y), tropical palm island upper-middle (52% x, 19% y), colorful reef arc below island at middle (53% x, 40% y), deep blue open sea lower-middle (54% x, 62% y), dark abyss canyon lower-right (81% x, 72% y). Preserve the decorative nautical border and recognizable terrain layout. CRITICAL REMOVE EVERY ANIMAL AND ANIMAL SILHOUETTE: remove every fish, school of fish, tiny animal icon, bird, turtle, shell/crab or creature anywhere on this map. Also remove little boats and huts so this is strictly natural scenery. Fill removals with continuous matching water, terrain or vegetation. Keep only rocks, water waves, sand, palm trees, mangrove roots, kelp, reef structures and deep canyon. No animals even at tiny pixel scale. No writing, labels, letters, logo or watermark. Calm, refined, luminous cartographic pixel game art, no artificial blur, avoid excess detail that obscures the six distinct regions.",
+      "asset": "src/assets/images/scenery/map.webp",
+      "generatedWidth": 1672,
+      "generatedHeight": 941,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 542862,
+      "sha256": "d68c7175491ef3c3bfff5c58415110ae60f94a6f095f08e3c1f39feb0a766c97"
+    }
+  ]
+}

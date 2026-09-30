@@ -48,7 +48,7 @@ export function OceanCanvas({ dimmed = false }: { dimmed?: boolean }) {
         "pointer-events-none fixed inset-0 h-full w-full transition-opacity duration-700",
         dimmed ? "opacity-35" : "opacity-100",
       )}
-      style={{ imageRendering: "pixelated" }}
+      style={{ imageRendering: "auto" }}
     />
   );
 }

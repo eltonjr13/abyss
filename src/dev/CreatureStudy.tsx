@@ -24,7 +24,7 @@ export default function CreatureStudy() {
       <nav aria-label="Habitat" className="my-6 flex flex-wrap gap-2">
         {BIOME_ORDER.map(id => <button key={id} onClick={() => setBiome(id)} aria-pressed={biome === id} className={`border px-4 py-2 text-xs ${biome === id ? "border-[#80bcb5] text-[#a3ddd4]" : "border-white/15 text-white/50"}`}>{BIOMES[id].short}</button>)}
       </nav>
-      <canvas ref={canvas} aria-label={`Fauna de ${BIOMES[biome].name}`} className="aspect-video w-full border border-white/10" style={{ imageRendering: "pixelated" }} />
+      <canvas ref={canvas} aria-label={`Fauna de ${BIOMES[biome].name}`} className="aspect-video w-full border border-white/10" />
       {BIOME_ORDER.map(id => <section key={id} className="mt-10">
         <h2 className="mb-4 font-serif text-2xl italic">{BIOMES[id].name}</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">

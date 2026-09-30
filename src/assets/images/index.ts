@@ -1,13 +1,13 @@
-import reefDead from "./optimized/reef-dead.jpg";
-import reefAlive from "./optimized/reef-alive.jpg";
-import reefNight from "./optimized/reef-night.jpg";
-import kelp from "./optimized/kelp.jpg";
-import mangrove from "./optimized/mangrove.jpg";
-import island from "./optimized/island.jpg";
-import deep from "./optimized/deep.jpg";
-import abyss from "./optimized/abyss.jpg";
-import surface from "./optimized/surface.jpg";
-import map from "./optimized/map.jpg";
+import reefDead from "./scenery/reef-dead.webp";
+import reefAlive from "./scenery/reef-alive.webp";
+import reefNight from "./scenery/reef-night.webp";
+import kelp from "./scenery/kelp.webp";
+import mangrove from "./scenery/mangrove.webp";
+import island from "./scenery/island.webp";
+import deep from "./scenery/deep.webp";
+import abyss from "./scenery/abyss.webp";
+import surface from "./scenery/surface.webp";
+import map from "./scenery/map.webp";
 import type { BiomeId, TimeOfDay } from "../../types";
 import { getBiomeImageKeys, type ImageKey } from "./keys";
 
@@ -28,7 +28,7 @@ export const IMAGES: Record<ImageKey, string> = {
 
 /**
  * Retorna somente as URLs das imagens necessárias para o bioma e período do dia informados.
- * Isso evita carregar todos os 18MB/assets de uma vez no boot, carregando estritamente sob demanda.
+ * A decodificação do cenário acontece sob demanda, conforme o habitat e o horário.
  */
 export function getBiomeImageSources(biome: BiomeId, timeOfDay: TimeOfDay): string[] {
   return getBiomeImageKeys(biome, timeOfDay).map((key) => IMAGES[key]);
