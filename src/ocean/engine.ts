@@ -3,6 +3,7 @@ import { BIOMES } from "../data/biomes";
 import { SPECIES } from "../data/species";
 import type { BiomeId, ShapeId, TimeOfDay } from "../types";
 import { getSpriteCanvas } from "./sprites";
+import { creaturePose, locomotion } from "./creature-motion";
 import { perfMonitor } from "../perf/monitor";
 
 export interface OceanConfig {
@@ -22,6 +23,7 @@ interface Fish {
   amp: number;
   scale: number;
   shape: ShapeId;
+  speciesId: string;
   palette: string[];
   flip: boolean;
   z: number;
@@ -125,6 +127,7 @@ export class OceanEngine {
   private debris: Debris[] = [];
   private rays: Ray[] = [];
   private reduced = false;
+  private motionQuery: MediaQueryList;
   private bgCanvas: HTMLCanvasElement | null = null;
   private hidden = false;
   private loadingImages = false;
@@ -137,7 +140,8 @@ export class OceanEngine {
     this.buffer.height = H;
     this.bctx = this.buffer.getContext("2d")!;
     this.config = config;
-    this.reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    this.motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    this.reduced = this.motionQuery.matches;
     this.resize();
   }
 
@@ -215,13 +219,17 @@ export class OceanEngine {
     };
     this.raf = requestAnimationFrame(loop);
     document.addEventListener("visibilitychange", this.onVis);
+    this.motionQuery.addEventListener("change", this.onMotion);
   }
 
   stop() {
     this.running = false;
     cancelAnimationFrame(this.raf);
     document.removeEventListener("visibilitychange", this.onVis);
+    this.motionQuery.removeEventListener("change", this.onMotion);
   }
+
+  private onMotion = () => { this.reduced = this.motionQuery.matches; };
 
   private onVis = () => {
     this.hidden = document.hidden;
@@ -267,16 +275,20 @@ export class OceanEngine {
       const spec = pool.length ? pool[Math.floor(rng() * pool.length)]! : SPECIES[0]!;
       const dir = rng() > 0.5 ? 1 : -1;
       const z = rng();
+      const mode = locomotion(spec.shape, spec.id);
+      const bottom = mode === "anchored" || mode === "crawl";
+      const baseY = bottom ? H - 19 - rng() * 8 : mode === "surface" ? 20 + rng() * 15 : 40 + rng() * (H - 100);
       this.fish.push({
         x: rng() * W,
-        y: 30 + rng() * (H - 70),
-        baseY: 30 + rng() * (H - 70),
-        vx: dir * (6 + rng() * 14) * (0.5 + z),
+        y: baseY,
+        baseY,
+        vx: dir * (mode === "anchored" ? 0 : mode === "crawl" ? 1.5 : mode === "pulse" ? 3 + rng() * 5 : 6 + rng() * 14) * (0.5 + z),
         vy: 0,
         phase: rng() * Math.PI * 2,
         amp: 3 + rng() * 8,
         scale: z > 0.7 ? 2 : 1,
         shape: spec.shape,
+        speciesId: spec.id,
         palette: spec.palette,
         flip: dir < 0,
         z,
@@ -347,15 +359,14 @@ export class OceanEngine {
 
   private simulate(dt: number) {
     for (const f of this.fish) {
-      f.x += f.vx * dt;
-      f.y = f.baseY + Math.sin(this.t * f.speed + f.phase) * f.amp;
-      if (f.x > W + 28) {
-        f.x = -28;
-        f.baseY = 30 + Math.random() * (H - 70);
+      const pose = creaturePose(f.shape, this.t, f.phase, f.speed, this.reduced, f.speciesId);
+      f.x += f.vx * pose.surge * dt;
+      f.y = f.baseY + pose.bob * f.amp;
+      if (f.x > W + 64) {
+        f.x = -64;
       }
-      if (f.x < -28) {
-        f.x = W + 28;
-        f.baseY = 30 + Math.random() * (H - 70);
+      if (f.x < -64) {
+        f.x = W + 64;
       }
     }
     for (const b of this.bubbles) {
@@ -484,10 +495,10 @@ export class OceanEngine {
     const mid = this.fish.filter((f) => f.z >= 0.45 && f.z < 0.75);
     const near = this.fish.filter((f) => f.z >= 0.75);
 
-    this.drawFish(b, far, 1);
+    this.drawFish(b, far);
     this.drawPlants(b, true);
-    this.drawFish(b, mid, 1);
-    this.drawFish(b, near, 2);
+    this.drawFish(b, mid);
+    this.drawFish(b, near);
 
     for (const m of this.motes) {
       const glow = timeOfDay === "night";
@@ -540,13 +551,19 @@ export class OceanEngine {
     out.drawImage(this.buffer, dx, dy, dw, dh);
   }
 
-  private drawFish(b: CanvasRenderingContext2D, list: Fish[], scaleBoost: number) {
+  private drawFish(b: CanvasRenderingContext2D, list: Fish[]) {
     for (const f of list) {
-      const sc = Math.max(1, Math.round(f.scale * scaleBoost));
-      const spr = getSpriteCanvas(f.shape, f.palette, f.vx < 0, sc);
+      const pose = creaturePose(f.shape, this.t, f.phase, f.speed, this.reduced, f.speciesId);
+      const spr = getSpriteCanvas(f.shape, f.palette, false, 1, pose.frame, f.speciesId);
+      const width = spr.width * f.scale / 2;
+      const height = spr.height * f.scale / 2;
+      b.save();
       b.globalAlpha = 0.55 + f.z * 0.45;
-      b.drawImage(spr, (f.x | 0) - spr.width / 2, (f.y | 0) - spr.height / 2);
-      b.globalAlpha = 1;
+      b.translate(Math.round(f.x), Math.round(f.y));
+      b.rotate(pose.tilt);
+      b.scale(f.vx < 0 ? -1 : 1, 1);
+      b.drawImage(spr, -width / 2, -height / 2, width, height);
+      b.restore();
     }
   }
 
