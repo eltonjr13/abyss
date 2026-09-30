@@ -4,6 +4,7 @@ import { SPECIES } from "../data/species";
 import type { BiomeId, ShapeId, TimeOfDay } from "../types";
 import { getSpriteCanvas } from "./sprites";
 import { creaturePose, locomotion } from "./creature-motion";
+import { habitatBlend, submergedPalette, waterCurrent, waterLight } from "./atmosphere";
 import { perfMonitor } from "../perf/monitor";
 
 export interface OceanConfig {
@@ -46,6 +47,7 @@ interface Mote {
   vy: number;
   s: number;
   a: number;
+  z: number;
 }
 
 interface Plant {
@@ -113,8 +115,12 @@ export class OceanEngine {
   private debris: Debris[] = [];
   private rays: Ray[] = [];
   private reduced = false;
+  private lowPower = false;
   private motionQuery: MediaQueryList;
   private bgCanvas: HTMLCanvasElement | null = null;
+  private lightCanvas: HTMLCanvasElement;
+  private lctx: CanvasRenderingContext2D;
+  private transition: { image: HTMLCanvasElement; elapsed: number; ready: boolean } | null = null;
   private hidden = false;
   private loadingImages = false;
 
@@ -125,6 +131,10 @@ export class OceanEngine {
     this.buffer.width = W;
     this.buffer.height = H;
     this.bctx = this.buffer.getContext("2d")!;
+    this.lightCanvas = document.createElement("canvas");
+    this.lightCanvas.width = W;
+    this.lightCanvas.height = H;
+    this.lctx = this.lightCanvas.getContext("2d")!;
     this.config = config;
     this.motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     this.reduced = this.motionQuery.matches;
@@ -141,7 +151,11 @@ export class OceanEngine {
     if (this.loadingImages) return;
     const needed = getBiomeImageSources(this.config.biome, this.config.timeOfDay);
     const toLoad = needed.filter((src) => !imageCache.has(src));
-    if (toLoad.length === 0) return;
+    if (toLoad.length === 0) {
+      this.composeBackground();
+      if (this.transition) this.transition.ready = true;
+      return;
+    }
 
     this.loadingImages = true;
     try {
@@ -162,6 +176,7 @@ export class OceanEngine {
     // A habitat selected during an in-flight load still needs its own scenery.
     const currentSources = getBiomeImageSources(this.config.biome, this.config.timeOfDay);
     if (this.running && currentSources.join("|") !== needed.join("|")) await this.ensureBiomeImages();
+    else if (this.transition) this.transition.ready = true;
   }
 
   setConfig(partial: Partial<OceanConfig>) {
@@ -170,12 +185,18 @@ export class OceanEngine {
     const lifeChanged = Math.abs(next.life - this.config.life) > 0.5;
     const todChanged = next.timeOfDay !== this.config.timeOfDay;
     const creaturesChanged = next.showCreatures !== this.config.showCreatures;
-    this.config = next;
-    if (biomeChanged || todChanged) {
-      void this.ensureBiomeImages();
+    if ((biomeChanged || todChanged) && this.bgCanvas) {
+      // Capture what is actually visible, including an interrupted crossfade.
+      const image = document.createElement("canvas");
+      image.width = this.canvas.width;
+      image.height = this.canvas.height;
+      image.getContext("2d")!.drawImage(this.canvas, 0, 0);
+      this.transition = { image, elapsed: 0, ready: false };
     }
+    this.config = next;
     if (biomeChanged || lifeChanged || todChanged || creaturesChanged) this.rebuild();
     else if (!this.bgCanvas) this.composeBackground();
+    if (biomeChanged || todChanged) void this.ensureBiomeImages();
   }
 
   resize() {
@@ -217,6 +238,7 @@ export class OceanEngine {
     cancelAnimationFrame(this.raf);
     document.removeEventListener("visibilitychange", this.onVis);
     this.motionQuery.removeEventListener("change", this.onMotion);
+    this.transition = null;
   }
 
   private onMotion = () => { this.reduced = this.motionQuery.matches; };
@@ -226,7 +248,8 @@ export class OceanEngine {
     this.last = performance.now();
   };
 
-  private rebuild() {
+  private rebuild(preserveFauna = false) {
+    const previousFish = this.fish;
     this.composeBackground();
     const { biome, life, timeOfDay } = this.config;
     const rng = mulberry32(biome.length * 97 + Math.floor(life) * 13);
@@ -279,7 +302,7 @@ export class OceanEngine {
         scale: z > 0.7 ? 2 : 1,
         shape: spec.shape,
         speciesId: spec.id,
-        palette: spec.palette,
+        palette: submergedPalette(spec.palette, biome, timeOfDay, z, ["jelly", "lantern", "angler", "unknown"].includes(spec.shape)),
         flip: dir < 0,
         z,
         speed: 0.6 + rng() * 1.4,
@@ -287,6 +310,8 @@ export class OceanEngine {
     }
 
     const isLowPower = perfMonitor.isLowPowerMode();
+    this.lowPower = isLowPower;
+    if (preserveFauna) this.fish = previousFish;
     this.bubbles = [];
     const bcount = Math.floor((14 + Math.floor(life / 10)) * (isLowPower ? 0.6 : 1));
     for (let i = 0; i < bcount; i++) {
@@ -306,20 +331,21 @@ export class OceanEngine {
       this.motes.push({
         x: rng() * W,
         y: rng() * H,
-        vx: (rng() - 0.5) * 4,
-        vy: (rng() - 0.5) * 6,
+        vx: (rng() - 0.5) * 0.5,
+        vy: (rng() - 0.5) * 0.7,
         s: rng() > 0.8 ? 2 : 1,
         a: 0.15 + rng() * 0.45,
+        z: rng(),
       });
     }
 
     this.rays = [];
-    const rcount = timeOfDay === "night" ? 2 : timeOfDay === "dusk" ? 3 : 5;
+    const rcount = waterLight(biome, timeOfDay).strength > 0 ? (isLowPower ? 3 : 5) : 0;
     for (let i = 0; i < rcount; i++) {
       this.rays.push({
-        x: rng() * W,
-        w: 8 + rng() * 18,
-        a: 0.04 + rng() * 0.06,
+        x: (i + 0.3 + rng() * 0.4) * W / rcount,
+        w: 18 + rng() * 25,
+        a: 0.04 + rng() * 0.05,
         phase: rng() * Math.PI * 2,
       });
     }
@@ -335,8 +361,10 @@ export class OceanEngine {
   }
 
   private tick(dt: number, now: number) {
+    if (this.lowPower !== perfMonitor.isLowPowerMode()) this.rebuild(true);
     const speed = (this.reduced ? 0.35 : 1) * (this.config.intensity || 1);
     this.t += dt * speed;
+    if (this.transition?.ready) this.transition.elapsed += dt;
 
     const t0 = performance.now();
     this.simulate(dt * speed);
@@ -360,24 +388,29 @@ export class OceanEngine {
       }
     }
     for (const b of this.bubbles) {
+      const flow = waterCurrent(this.config.biome, this.reduced ? 0 : this.t, b.y);
       b.y -= b.vy * dt;
-      b.x += Math.sin(this.t * 0.8 + b.phase) * 6 * dt;
+      b.x += (flow.x + Math.sin(this.t * 0.6 + b.phase) * 0.7) * dt;
+      if (b.x > W + 4) b.x = -4;
       if (b.y < -4) {
         b.y = H + 4;
         b.x = Math.random() * W;
       }
     }
     for (const m of this.motes) {
-      m.x += m.vx * dt;
-      m.y += m.vy * dt;
+      const flow = waterCurrent(this.config.biome, this.reduced ? 0 : this.t, m.y);
+      const depth = 0.4 + m.z * 0.6;
+      m.x += (flow.x * depth + m.vx) * dt;
+      m.y += (flow.y * depth + m.vy) * dt;
       if (m.x < 0) m.x += W;
       if (m.x > W) m.x -= W;
       if (m.y < 0) m.y += H;
       if (m.y > H) m.y -= H;
     }
     for (const d of this.debris) {
-      d.x += d.vx * dt;
-      d.y += Math.sin(this.t * 0.4 + d.x) * 2 * dt;
+      const flow = waterCurrent(this.config.biome, this.reduced ? 0 : this.t, d.y);
+      d.x += (flow.x + d.vx * 0.15) * dt;
+      d.y += flow.y * dt;
       if (d.x > W + 10) d.x = -10;
       if (d.x < -10) d.x = W + 10;
     }
@@ -443,7 +476,61 @@ export class OceanEngine {
     x.restore();
   }
 
+  private drawLight() {
+    const b = this.lctx;
+    b.clearRect(0, 0, W, H);
+    const light = waterLight(this.config.biome, this.config.timeOfDay);
+    if (light.strength === 0) return;
+    const time = this.reduced ? 0 : this.t;
+    const rgb = light.color.join(",");
+    for (const r of this.rays) {
+      const ox = r.x + Math.sin(time * 0.12 + r.phase) * 9;
+      const pulse = 0.85 + Math.sin(time * 0.28 + r.phase) * 0.15;
+      const alpha = r.a * light.strength * pulse;
+      b.save();
+      b.translate(ox, 0);
+      b.rotate(-0.12);
+      const gradient = b.createLinearGradient(-r.w, 0, r.w, 0);
+      gradient.addColorStop(0, `rgba(${rgb},0)`);
+      gradient.addColorStop(0.45, `rgba(${rgb},${alpha})`);
+      gradient.addColorStop(0.55, `rgba(${rgb},${alpha})`);
+      gradient.addColorStop(1, `rgba(${rgb},0)`);
+      b.fillStyle = gradient;
+      b.fillRect(-r.w, -10, r.w * 2, H + 30);
+      b.restore();
+    }
+    b.save();
+    b.globalCompositeOperation = "destination-in";
+    const falloff = b.createLinearGradient(0, 0, 0, H);
+    falloff.addColorStop(0, "rgba(0,0,0,1)");
+    falloff.addColorStop(1, "rgba(0,0,0,0.12)");
+    b.fillStyle = falloff;
+    b.fillRect(0, 0, W, H);
+    b.restore();
+    if (light.strength < 0.1) return;
+    // Sparse moving reflections, kept out of deep habitats and subdued in focus mode.
+    const count = perfMonitor.isLowPowerMode() ? 3 : 6;
+    for (let i = 0; i < count; i++) {
+      const x = (i + 0.5) * W / count + Math.sin(time * 0.2 + i * 2.1) * 10;
+      const y = H * 0.82 + Math.sin(time * 0.16 + i) * 12;
+      b.save();
+      b.translate(x, y);
+      b.scale(1, 0.22);
+      // Transform the gradient along with the ellipse, rather than stretching a pixel grid.
+      const reflection = b.createRadialGradient(0, 0, 0, 0, 0, 38);
+      reflection.addColorStop(0, `rgba(${rgb},${light.strength * 0.055})`);
+      reflection.addColorStop(1, `rgba(${rgb},0)`);
+      b.fillStyle = reflection;
+      b.fillRect(-38, -38, 76, 76);
+      b.restore();
+    }
+  }
+
   private draw() {
+    if (this.transition && !this.transition.ready) {
+      this.ctx.drawImage(this.transition.image, 0, 0, this.canvas.width, this.canvas.height);
+      return;
+    }
     const { biome, life, timeOfDay } = this.config;
     const b = this.bctx;
     b.imageSmoothingEnabled = false;
@@ -464,18 +551,6 @@ export class OceanEngine {
     b.fillStyle = todTint[timeOfDay];
     b.fillRect(0, 0, W, H);
 
-    for (const r of this.rays) {
-      const ox = r.x + Math.sin(this.t * 0.15 + r.phase) * 12;
-      b.fillStyle = `rgba(220, 235, 255, ${r.a * (timeOfDay === "night" ? 0.35 : 1)})`;
-      b.beginPath();
-      b.moveTo(ox, 0);
-      b.lineTo(ox + r.w, 0);
-      b.lineTo(ox + r.w * 1.6, H);
-      b.lineTo(ox - r.w * 0.4, H);
-      b.closePath();
-      b.fill();
-    }
-
     this.drawPlants(b, false);
     this.drawDebris(b);
 
@@ -491,8 +566,8 @@ export class OceanEngine {
     for (const m of this.motes) {
       const glow = timeOfDay === "night";
       b.fillStyle = glow
-        ? `rgba(140, 230, 220, ${m.a})`
-        : `rgba(210, 230, 230, ${m.a * 0.55})`;
+        ? `rgba(140, 230, 220, ${m.a * (0.4 + m.z * 0.6)})`
+        : `rgba(210, 230, 230, ${m.a * (0.18 + m.z * 0.37)})`;
       b.fillRect(m.x | 0, m.y | 0, m.s, m.s);
     }
 
@@ -541,6 +616,23 @@ export class OceanEngine {
     if (this.bgCanvas) out.drawImage(this.bgCanvas, dx, dy, dw, dh);
     out.imageSmoothingEnabled = false;
     out.drawImage(this.buffer, dx, dy, dw, dh);
+    this.drawLight();
+    // The same soft light reaches both the scenery and the already submerged sprites.
+    out.imageSmoothingEnabled = true;
+    out.save();
+    out.globalAlpha = Math.min(1, Math.max(0, this.config.intensity));
+    out.drawImage(this.lightCanvas, dx, dy, dw, dh);
+    out.restore();
+    if (this.transition) {
+      const blend = habitatBlend(this.transition.elapsed, this.reduced);
+      if (blend >= 1) this.transition = null;
+      else {
+        out.save();
+        out.globalAlpha = 1 - blend;
+        out.drawImage(this.transition.image, 0, 0, cw, ch);
+        out.restore();
+      }
+    }
   }
 
   private drawFish(b: CanvasRenderingContext2D, list: Fish[]) {
@@ -550,7 +642,7 @@ export class OceanEngine {
       const width = spr.width * f.scale / 2;
       const height = spr.height * f.scale / 2;
       b.save();
-      b.globalAlpha = 0.55 + f.z * 0.45;
+      b.globalAlpha = 0.4 + f.z * 0.6;
       b.translate(Math.round(f.x), Math.round(f.y));
       b.rotate(pose.tilt);
       b.scale(f.vx < 0 ? -1 : 1, 1);
@@ -567,8 +659,10 @@ export class OceanEngine {
       const isFore = p.x % 2 < 1;
       if (foreground !== isFore) continue;
       const h = p.h * (0.45 + (life / 100) * 0.55);
+      const time = this.reduced ? 0 : this.t;
+      const flow = waterCurrent(biome, time, H - h * 0.5);
       for (let i = 0; i < h; i++) {
-        const sway = Math.sin(this.t * 0.7 + p.phase + i * 0.12) * (i / h) * 5;
+        const sway = (flow.x + Math.sin(time * 0.4 + p.phase + i * 0.07) * 2) * (i / h);
         const x = (p.x + sway) | 0;
         const y = (H - 6 - i) | 0;
         const leaf = i % 5 === 0;

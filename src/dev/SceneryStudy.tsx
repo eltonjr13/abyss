@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { IMAGES, type ImageKey } from "../assets/images";
 import { BIOMES, BIOME_ORDER } from "../data/biomes";
 import { OceanEngine } from "../ocean/engine";
+import { PerfPanel } from "../components/PerfPanel";
 import type { BiomeId, TimeOfDay } from "../types";
 
 const plates: { key: ImageKey; label: string }[] = [
@@ -37,7 +38,7 @@ export default function SceneryStudy() {
   return <main className="mx-auto max-w-6xl px-5 py-8 text-[#e6eee8]">
     <p className="text-xs tracking-[0.3em] text-[#80bcb5]">MERGULHE / CENÁRIOS</p>
     <h1 className="mt-3 font-serif text-4xl italic">O habitat antes da vida.</h1>
-    <p className="mt-3 text-sm text-white/50">Dez imagens de cenário em 1920 × 1080. Rochas, água, areia e vegetação. A fauna entra pelo jogo.</p>
+    <p className="mt-3 text-sm text-white/50">Dez cenários com luz em movimento e correntes suaves. Ative a fauna para observar as cores e a profundidade; troque o habitat para comparar as transições.</p>
     <nav aria-label="Habitat" className="my-5 flex flex-wrap gap-2">
       {BIOME_ORDER.map(id => <button key={id} onClick={() => setBiome(id)} aria-pressed={biome === id} className={`border px-4 py-2 text-xs ${biome === id ? "border-[#80bcb5] text-[#a3ddd4]" : "border-white/15 text-white/50"}`}>{BIOMES[id].short}</button>)}
     </nav>
@@ -53,5 +54,6 @@ export default function SceneryStudy() {
         <figcaption className="px-4 py-3 text-sm">{label}<span className="ml-3 text-xs text-white/35">1920 × 1080</span></figcaption>
       </figure>)}
     </section>
+    <PerfPanel />
   </main>;
 }
