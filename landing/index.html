@@ -9,7 +9,7 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23061018'/%3E%3Cpath d='M9 16a7 7 0 0 1 14 0' fill='%23e7f2f2'/%3E%3Cpath d='M5 17h22v3H5zm4 5h14v2H9zm5 5h4v2h-4z' fill='%2353d6d2'/%3E%3C/svg%3E">
   <link rel="preload" href="assets/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
-  <script src="script.js" defer></script>
+  <script src="script.js" type="module"></script>
 </head>
 <body>
   <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -23,25 +23,31 @@
       <a href="#oceano">Seu oceano</a>
       <a class="nav-cta" href="#plataformas">Onde mergulhar</a>
     </nav>
+    <button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="false"><span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i></span><span id="sound-label">Ativar som do oceano</span></button>
   </header>
+  <div class="depth-rail" aria-hidden="true"><span>SUPERFÍCIE</span><div><i id="depth-progress"></i></div><span>PROFUNDEZAS</span></div>
+  <p class="sound-status sr-only" id="sound-status" role="status"></p>
   <main id="conteudo">
     <section class="hero" aria-labelledby="hero-title">
       <img class="hero-ocean" src="assets/surface.jpg" alt="" width="1536" height="1024" fetchpriority="high">
+      <div class="ocean-light" aria-hidden="true"></div>
+      <canvas class="living-ocean hero-fauna" data-scene="hero" aria-hidden="true"></canvas>
       <div class="hero-inner">
         <div class="hero-copy">
-          <p class="eyebrow"><span class="tiny-pixel" aria-hidden="true"></span> UM TEMPO SEU. UM MUNDO VIVO.</p>
+          <p class="eyebrow"><span class="tiny-pixel" aria-hidden="true"></span> SEU PRIMEIRO MERGULHO COMEÇA AQUI.</p>
           <h1 id="hero-title">Seu foco dá vida<br>ao seu <em>oceano.</em></h1>
           <p class="hero-description">Reserve um tempo para o que importa.<br>Estude, trabalhe ou crie — e veja um pequeno mundo marinho ganhar vida com o seu foco.</p>
           <div class="hero-actions">
-            <a class="button button-primary" href="#experiencia">Conheça a experiência</a>
+            <a class="button button-primary" href="#experiencia">Faça seu primeiro mergulho</a>
             <a class="text-link" href="#oceano">Explore os biomas</a>
           </div>
           <p class="hero-note">Foco, biomas e descobertas. Tudo isso é grátis.</p>
         </div>
         <div class="hero-product">
-          <p class="preview-label">PRÉVIA DO NOVO DESIGN</p>
+          <p class="preview-label">UM PEQUENO MUNDO. TODO SEU.</p>
           <div class="app-preview" id="app-preview" aria-label="Prévia interativa do Mergulhe">
             <img class="app-scene" src="assets/reef-night.jpg" alt="Recife de coral em pixels sob a luz do oceano" width="1536" height="1024">
+            <canvas class="living-ocean" data-scene="preview" aria-hidden="true"></canvas>
             <div class="app-shade"></div>
             <div class="app-header"><span class="brand-wordmark"><img src="assets/logo-original.png" alt="Mergulhe" width="1254" height="1254"></span><span class="app-period">Noite</span></div>
             <div class="preview-home" id="preview-home">
@@ -61,25 +67,49 @@
       </div>
       <div class="hero-foot"><span>MENOS RUÍDO. MAIS PRESENÇA.</span><a href="#experiencia">Conheça o Mergulhe <span aria-hidden="true">↓</span></a></div>
     </section>
-    <section id="experiencia" class="section experience" aria-labelledby="experience-title">
-      <p class="eyebrow">DA CONCENTRAÇÃO À DESCOBERTA</p><h2 id="experience-title">Você cuida do seu tempo.<br>Seu oceano ganha vida.</h2>
-      <p class="section-intro">Escolha uma tarefa, reserve um tempo e concentre-se. Cada sessão concluída contribui para restaurar seu mundo marinho virtual.</p>
-      <div class="steps">
-        <article><span class="step-number">01</span><h3>Escolha seu tempo.</h3><p>Um bloco de estudo, uma ideia para desenvolver ou uma tarefa para terminar. Você escolhe a duração, inclusive sem cronômetro.</p></article>
-        <article><span class="step-number">02</span><h3>Entre no seu ritmo.</h3><p>Um cenário marinho e uma paisagem sonora acompanham a sessão. Deixe o Mergulhe por perto e volte sua atenção à tarefa.</p></article>
-        <article><span class="step-number">03</span><h3>Veja a vida voltar.</h3><p>Ao concluir, acompanhe seu progresso. Seu recife ganha vida e novas descobertas aparecem conforme você avança.</p></article>
+    <section id="experiencia" class="experience" aria-labelledby="experience-title">
+      <div class="section experience-layout">
+        <div class="journey-copy">
+          <p class="eyebrow">01 / UM TEMPO SEU</p><h2 id="experience-title">Você encontra o ritmo.<br>A vida encontra o caminho.</h2>
+          <p class="section-intro">Escolha uma tarefa. Dê a ela um pouco do seu tempo. Cada sessão concluída ajuda a restaurar seu mundo marinho virtual.</p>
+          <div class="steps">
+            <article class="journey-step" data-step="0"><span class="step-number">01</span><div><h3>Escolha seu tempo.</h3><p>Uma leitura, um trabalho, uma ideia. Você escolhe a duração, inclusive sem cronômetro.</p></div></article>
+            <article class="journey-step" data-step="1"><span class="step-number">02</span><div><h3>Entre no seu ritmo.</h3><p>A luz desacelera. O oceano acompanha. Sua atenção fica com o que importa.</p></div></article>
+            <article class="journey-step" data-step="2"><span class="step-number">03</span><div><h3>Veja a vida voltar.</h3><p>O recife recupera as cores. Novas criaturas aparecem. Seu tempo deixa uma marca.</p></div></article>
+          </div>
+        </div>
+        <div class="restoration-card" id="restoration-card">
+          <div class="restore-scene">
+            <img class="restore-before" src="assets/reef-alive.jpg" alt="" width="1536" height="1024" loading="lazy">
+            <img class="restore-after" src="assets/reef-alive.jpg" alt="Recife de Coral recuperando suas cores" width="1536" height="1024" loading="lazy">
+            <div class="ocean-light" aria-hidden="true"></div>
+            <canvas class="living-ocean" data-scene="restoration" aria-hidden="true"></canvas>
+            <span class="scene-caption">DEMONSTRAÇÃO ACELERADA · 15 SEGUNDOS</span>
+            <div class="restore-scene-copy"><span id="demo-stage">Um mundo esperando por você.</span><strong><span id="demo-life">0</span><small>% de vida</small></strong></div>
+          </div>
+          <div class="restore-controls">
+            <div class="demo-heading"><span>RECIFE DE CORAL</span><span id="demo-time">00:15</span></div>
+            <label for="restore-range">Explore a transformação <span aria-hidden="true">antes / depois</span></label>
+            <input id="restore-range" type="range" min="0" max="100" value="0" aria-label="Vida do recife na demonstração" aria-valuetext="0% de vida">
+            <div class="demo-actions"><button id="demo-start" class="button button-primary" type="button">Ver a vida voltar</button><button id="demo-reset" class="text-button" type="button">Reiniciar</button></div>
+            <p class="demo-note">Aqui, 15 segundos contam uma história. No aplicativo, o progresso vem das suas sessões de foco.</p>
+            <p class="sr-only" id="demo-status" role="status"></p>
+          </div>
+        </div>
       </div>
     </section>
     <section id="oceano" class="ocean-section" aria-labelledby="ocean-title">
       <div class="section">
-        <div class="ocean-heading"><div><p class="eyebrow">UM MUNDO PARA CONHECER</p><h2 id="ocean-title">A superfície é<br>só o começo.</h2></div><p class="section-intro">Do recife ao abismo, seis biomas para descobrir no seu ritmo. Cada região tem sua luz, suas cores e suas formas de vida.</p></div>
+        <div class="ocean-heading"><div><p class="eyebrow">02 / SIGA A CURIOSIDADE</p><h2 id="ocean-title">A superfície é<br>só o começo.</h2></div><p class="section-intro">Seis biomas. Seis maneiras de sentir o oceano. Explore a luz, as cores e a vida de cada região.</p></div>
         <div class="biome-layout">
-          <div class="biome-image-wrap"><img id="biome-image" src="assets/reef-alive.jpg" alt="Recife de Coral: cenário do aplicativo em pixels" width="1536" height="1024" loading="lazy"><span class="scene-caption">ARTE DO APLICATIVO</span></div>
+          <div class="biome-image-wrap" id="biome-scene"><img id="biome-image" src="assets/reef-alive.jpg" alt="Recife de Coral: cenário do aplicativo em pixels" width="1536" height="1024" loading="lazy"><img id="biome-next" class="biome-next" src="assets/reef-alive.jpg" alt="" width="1536" height="1024" loading="lazy"><div class="ocean-light" aria-hidden="true"></div><canvas class="living-ocean" data-scene="biome" aria-hidden="true"></canvas><span class="scene-caption" id="biome-atmosphere">LUZ DA SUPERFÍCIE</span><span class="scene-interaction">Toque ou aproxime-se da vida.</span></div>
           <div class="biome-panel">
             <p class="eyebrow" id="biome-count">01 / 06</p><h3 id="biome-title">Recife de Coral</h3><p id="biome-description" class="biome-description">Onde a cor aprende a voltar.</p>
             <div class="biome-choices" role="group" aria-label="Escolha um bioma">
               <button class="biome-choice" type="button" data-biome="reef" aria-pressed="true">Recife</button><button class="biome-choice" type="button" data-biome="kelp" aria-pressed="false">Kelp</button><button class="biome-choice" type="button" data-biome="mangrove" aria-pressed="false">Mangue</button><button class="biome-choice" type="button" data-biome="island" aria-pressed="false">Ilha</button><button class="biome-choice" type="button" data-biome="deep" aria-pressed="false">Profundo</button><button class="biome-choice" type="button" data-biome="abyss" aria-pressed="false">Abismo</button>
             </div>
+            <div class="species-discovery" aria-live="polite"><canvas id="species-sprite" width="96" height="72" aria-hidden="true"></canvas><div><p class="eyebrow">UMA DESCOBERTA DESTE MUNDO</p><h4 id="species-name">Peixe-palhaço</h4><p id="species-blurb">Volta primeiro. Sempre. Como se o recife precisasse de uma cor corajosa para lembrar as outras.</p></div></div>
+            <p class="biome-feedback" id="biome-feedback" role="status"></p>
             <p class="biome-note">Todos os biomas fazem parte da experiência gratuita. Novas regiões se abrem conforme seu progresso.</p>
           </div>
         </div>
@@ -93,7 +123,7 @@
       <div class="section"><p class="eyebrow">SEU PRÓXIMO MERGULHO</p><h2 id="platform-title">O essencial é gratuito.<br>O oceano é seu.</h2><p class="section-intro">Sessões de foco, progressão nos seis biomas e descobertas de espécies fazem parte do Mergulhe grátis.</p>
         <div class="platform-list"><div><span class="platform-name">Chrome</span><span class="platform-status">Publicação em preparação</span></div><div><span class="platform-name">Android</span><span class="platform-status">Em breve</span></div><div><span class="platform-name">iPhone</span><span class="platform-status">Em breve</span></div></div>
         <p class="platform-note">Os links de instalação aparecerão aqui quando cada versão estiver disponível nas lojas.</p>
-        <a class="button button-secondary" href="#app-preview">Experimentar a prévia visual</a>
+        <a class="button button-primary" href="#experiencia">Faça seu primeiro mergulho</a>
       </div>
     </section>
     <section id="duvidas" class="section faq-section" aria-labelledby="faq-title">
@@ -101,7 +131,7 @@
       <div class="faq-list">
         <details><summary>O que é o Mergulhe?</summary><p>Um aplicativo de foco com um mundo marinho virtual. Você escolhe uma duração, concentra-se na sua tarefa e acompanha o oceano ganhar vida conforme conclui sessões.</p></details>
         <details><summary>O que posso usar gratuitamente?</summary><p>As sessões de foco, a progressão pelos seis biomas e todas as descobertas de espécies. O Mergulhe Plus é uma proposta de extras opcionais e sua compra ainda não está disponível.</p></details>
-        <details><summary>A prévia desta página é o aplicativo?</summary><p>Esta página apresenta o produto e uma proposta interativa do novo design. O tempo e o progresso exibidos na prévia são ilustrativos; ela não salva sessões nem altera seu oceano no aplicativo.</p></details>
+        <details><summary>A prévia desta página é o aplicativo?</summary><p>Esta página apresenta o produto e uma proposta interativa do novo design. A transformação de 15 segundos é uma demonstração acelerada. O tempo e o progresso exibidos são ilustrativos; a página não salva sessões nem altera seu oceano no aplicativo.</p></details>
         <details><summary>Preciso criar uma conta?</summary><p>O aplicativo oferece foco local sem cadastro. A conta é opcional para os recursos que precisam de identificação. Você não precisa entrar em uma conta para explorar esta apresentação.</p></details>
         <details><summary>Como o oceano ganha vida?</summary><p>As sessões concluídas concedem progresso no mundo virtual. Você começa no Recife de Coral e avança para outras regiões conforme restaura os biomas. A simulação representa um oceano do jogo.</p></details>
         <details><summary>Já posso instalar?</summary><p>As versões para Chrome, Android e iPhone estão em preparação para publicação. Esta página será atualizada com os links oficiais conforme cada versão estiver disponível.</p></details>
