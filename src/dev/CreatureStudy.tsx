@@ -9,7 +9,7 @@ export default function CreatureStudy() {
   const [biome, setBiome] = useState<BiomeId>("reef");
   const canvas = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    const engine = new OceanEngine(canvas.current!, { biome, life: 100, timeOfDay: "day", intensity: 1 });
+    const engine = new OceanEngine(canvas.current!, { biome, life: 100, timeOfDay: "day", intensity: 1, discovered: SPECIES.map(s => s.id) });
     void engine.init();
     const resize = () => engine.resize();
     window.addEventListener("resize", resize);

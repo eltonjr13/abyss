@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { IMAGES, type ImageKey } from "../assets/images";
 import { BIOMES, BIOME_ORDER } from "../data/biomes";
+import { SPECIES } from "../data/species";
 import { OceanEngine } from "../ocean/engine";
 import { PerfPanel } from "../components/PerfPanel";
 import type { BiomeId, TimeOfDay } from "../types";
@@ -26,7 +27,7 @@ export default function SceneryStudy() {
   const canvas = useRef<HTMLCanvasElement>(null);
   const engine = useRef<OceanEngine | null>(null);
   useEffect(() => {
-    const ocean = new OceanEngine(canvas.current!, { biome: "reef", life: 100, timeOfDay: "day", intensity: 1, showCreatures: false });
+    const ocean = new OceanEngine(canvas.current!, { biome: "reef", life: 100, timeOfDay: "day", intensity: 1, discovered: SPECIES.map(s => s.id), showCreatures: false });
     engine.current = ocean;
     void ocean.init();
     const observer = new ResizeObserver(() => ocean.resize());

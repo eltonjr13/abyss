@@ -18,6 +18,7 @@ export function OceanCanvas({ dimmed = false }: { dimmed?: boolean }) {
       life: state.biomeLife[state.currentBiome] ?? 0,
       timeOfDay: getTimeOfDay(),
       intensity,
+      discovered: state.discovered,
     });
     engineRef.current = engine;
     void engine.init();
@@ -38,8 +39,9 @@ export function OceanCanvas({ dimmed = false }: { dimmed?: boolean }) {
       life: state.biomeLife[state.currentBiome] ?? 0,
       timeOfDay: getTimeOfDay(),
       intensity,
+      discovered: state.discovered,
     });
-  }, [state.currentBiome, state.biomeLife, intensity]);
+  }, [state.currentBiome, state.biomeLife, state.discovered, intensity]);
 
   return (
     <canvas

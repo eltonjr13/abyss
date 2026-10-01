@@ -1,6 +1,6 @@
 import { IMAGES, getBiomeImageSources } from "../assets/images";
 import { BIOMES } from "../data/biomes";
-import { SPECIES } from "../data/species";
+import { discoveredSpeciesOfBiome } from "../data/species";
 import type { BiomeId, ShapeId, TimeOfDay } from "../types";
 import { getSpriteCanvas } from "./sprites";
 import { creaturePose, locomotion } from "./creature-motion";
@@ -12,6 +12,7 @@ export interface OceanConfig {
   life: number;
   timeOfDay: TimeOfDay;
   intensity: number;
+  discovered: readonly string[];
   showCreatures?: boolean;
 }
 
@@ -185,6 +186,7 @@ export class OceanEngine {
     const lifeChanged = Math.abs(next.life - this.config.life) > 0.5;
     const todChanged = next.timeOfDay !== this.config.timeOfDay;
     const creaturesChanged = next.showCreatures !== this.config.showCreatures;
+    const discoveriesChanged = next.discovered !== this.config.discovered;
     if ((biomeChanged || todChanged) && this.bgCanvas) {
       // Capture what is actually visible, including an interrupted crossfade.
       const image = document.createElement("canvas");
@@ -194,7 +196,7 @@ export class OceanEngine {
       this.transition = { image, elapsed: 0, ready: false };
     }
     this.config = next;
-    if (biomeChanged || lifeChanged || todChanged || creaturesChanged) this.rebuild();
+    if (biomeChanged || lifeChanged || todChanged || creaturesChanged || discoveriesChanged) this.rebuild();
     else if (!this.bgCanvas) this.composeBackground();
     if (biomeChanged || todChanged) void this.ensureBiomeImages();
   }
@@ -279,13 +281,11 @@ export class OceanEngine {
       });
     }
 
-    const eligible = SPECIES.filter((s) => s.biome === biome && life >= s.minLife);
-    const extras = SPECIES.filter((s) => s.biome === biome && life >= s.minLife * 0.7);
-    const pool = eligible.length ? eligible : extras.slice(0, 2);
-    const fishCount = this.config.showCreatures === false ? 0 : Math.floor(2 + (life / 100) * (night ? 10 : 16));
+    const pool = discoveredSpeciesOfBiome(biome, this.config.discovered);
+    const fishCount = this.config.showCreatures === false || pool.length === 0 ? 0 : Math.floor(2 + (life / 100) * (night ? 10 : 16));
     this.fish = [];
     for (let i = 0; i < fishCount; i++) {
-      const spec = pool.length ? pool[Math.floor(rng() * pool.length)]! : SPECIES[0]!;
+      const spec = pool[Math.floor(rng() * pool.length)]!;
       const dir = rng() > 0.5 ? 1 : -1;
       const z = rng();
       const mode = locomotion(spec.shape, spec.id);

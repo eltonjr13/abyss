@@ -648,3 +648,8 @@ export const SPECIES_BY_ID: Record<string, Species> = Object.fromEntries(
 export function speciesOfBiome(biome: Species["biome"]): Species[] {
   return SPECIES.filter((s) => s.biome === biome);
 }
+
+export function discoveredSpeciesOfBiome(biome: Species["biome"], discovered: readonly string[]): Species[] {
+  const known = new Set(discovered);
+  return speciesOfBiome(biome).filter((s) => known.has(s.id));
+}
