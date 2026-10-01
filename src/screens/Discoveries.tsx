@@ -10,14 +10,14 @@ import { cn } from "../utils/cn";
 export function Discoveries() {
   const { state, selectedSpecies, setSelectedSpecies } = useGame();
   const [filter, setFilter] = useState<BiomeId | "all">("all");
+  const [mode, setMode] = useState<"owned" | "unknown">("owned");
 
-  const list = useMemo(() => {
-    const src = filter === "all" ? SPECIES : SPECIES.filter((s) => s.biome === filter);
-    return src;
+  const habitatSpecies = useMemo(() => {
+    return filter === "all" ? SPECIES : SPECIES.filter((s) => s.biome === filter);
   }, [filter]);
-
-  const found = state.discovered.length;
-  const selected = selectedSpecies ? SPECIES_BY_ID[selectedSpecies] : null;
+  const found = habitatSpecies.filter(s => state.discovered.includes(s.id)).length;
+  const list = habitatSpecies.filter(s => state.discovered.includes(s.id) === (mode === "owned"));
+  const selected = selectedSpecies && state.discovered.includes(selectedSpecies) ? SPECIES_BY_ID[selectedSpecies] : null;
 
   return (
     <div className="relative z-20 min-h-dvh px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-[max(28px,env(safe-area-inset-top))]">
@@ -25,21 +25,31 @@ export function Discoveries() {
         <p className="font-pixel text-[10px] tracking-[0.4em] text-white/50">CÓDICE</p>
         <h1 className="mt-2 font-serif text-3xl text-[var(--foam)] italic">Descobertas</h1>
         <p className="mt-2 text-sm text-white/45">
-          {found} / {SPECIES.length} espécies
+          {found} / {habitatSpecies.length} espécies descobertas
         </p>
       </header>
+
+      <div className="mx-auto mt-5 flex max-w-2xl justify-center gap-2" aria-label="Visualização da coleção">
+        <Chip active={mode === "owned"} onClick={() => setMode("owned")}>Minhas descobertas</Chip>
+        <Chip active={mode === "unknown"} onClick={() => setMode("unknown")}>Ainda por descobrir</Chip>
+      </div>
 
       <div className="mx-auto mt-5 flex max-w-2xl flex-wrap justify-center gap-1.5">
         <Chip active={filter === "all"} onClick={() => setFilter("all")}>
           Todas
         </Chip>
-        {BIOME_ORDER.map((id) => (
+        {BIOME_ORDER.filter(id => state.unlockedBiomes.includes(id)).map((id) => (
           <Chip key={id} active={filter === id} onClick={() => setFilter(id)}>
             {BIOMES[id].short}
           </Chip>
         ))}
       </div>
 
+      {list.length === 0 && (
+        <p role="status" className="mx-auto mt-8 max-w-sm text-center font-serif text-lg text-white/60 italic">
+          {mode === "owned" ? "Suas descobertas aparecerão aqui depois dos mergulhos." : "Você já descobriu todas as espécies deste habitat."}
+        </p>
+      )}
       <div className="mx-auto mt-6 grid max-w-2xl grid-cols-3 gap-2 sm:grid-cols-4">
         {list.map((s) => {
           const known = state.discovered.includes(s.id);
@@ -86,6 +96,7 @@ function Chip({
   return (
     <button
       onClick={onClick}
+      aria-pressed={active}
       className={cn(
         "min-h-10 border px-2.5 py-1 text-[10px] tracking-[0.12em] uppercase",
         active ? "border-white/40 text-[var(--foam)]" : "border-white/10 text-white/40",

@@ -1,7 +1,7 @@
 import { todayKey } from "../lib/format";
 import type { ActiveSession, AudioSettings, BiomeId, GameState, Rewards } from "../types";
 import { applySession } from "./progress";
-import { freshState, loadSnapshot, refreshDay } from "./save";
+import { freshState, loadSnapshot, refreshDay, type SaveSnapshot } from "./save";
 import { createSession, elapsedSeconds, MIN_REWARD_SECONDS, pauseSessionAt, resumeSessionAt } from "./session";
 import { isActive, sessionFromRow, type FocusSnapshot } from "../focus/shared";
 
@@ -10,9 +10,11 @@ export interface GameData {
   session: ActiveSession | null;
   rewards: Rewards | null;
   appliedSharedSessions?: string[];
+  accountId?: string | null;
 }
 
 export type GameAction =
+  | { type: "account"; accountId: string | null; snapshot: SaveSnapshot }
   | { type: "shared"; snapshot: FocusSnapshot; userId: string; now: number }
   | { type: "detach_shared" }
   | { type: "onboarding" }
@@ -30,7 +32,7 @@ export type GameAction =
   | { type: "revoke_plus" };
 
 export function initialGameData(): GameData {
-  return { ...loadSnapshot(), rewards: null };
+  return { ...loadSnapshot(), session: null, rewards: null, accountId: null };
 }
 
 function seededRandom(seed: number): () => number {
@@ -45,15 +47,21 @@ function seededRandom(seed: number): () => number {
 
 export function gameReducer(data: GameData, action: GameAction): GameData {
   switch (action.type) {
+    case "account":
+      return { ...action.snapshot, accountId: action.accountId, rewards: null,
+        session: action.accountId && action.snapshot.session?.sharedUserId === action.accountId ? action.snapshot.session : null };
     case "detach_shared":
       return data.session?.sharedUserId ? { ...data, session: null, rewards: null } : data;
     case "shared": {
+      if (data.accountId !== undefined && data.accountId !== action.userId) return data;
       // Finish a pre-existing guest session locally before joining the account timer.
       if (data.session && !data.session.sharedUserId) return data;
       let state = data.state;
       let rewards = data.rewards;
       const applied = new Set(data.appliedSharedSessions ?? []);
-      for (const row of action.snapshot.completed) {
+      const completed = [...action.snapshot.completed].sort((a, b) =>
+        (a.completed_at ?? "").localeCompare(b.completed_at ?? "") || a.id.localeCompare(b.id));
+      for (const row of completed) {
         if (row.user_id !== action.userId || row.status !== "completed" || !row.completed_at || applied.has(row.id)) continue;
         applied.add(row.id);
         const seconds = Math.floor(Number(row.elapsed_ms) / 1000);

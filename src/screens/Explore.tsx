@@ -5,6 +5,7 @@ import { speciesOfBiome } from "../data/species";
 import { useGame } from "../game/GameContext";
 import type { BiomeId } from "../types";
 import { cn } from "../utils/cn";
+import { habitatRestoration } from "../ocean/restoration";
 
 const HOTSPOTS: { id: BiomeId; top: string; left: string; w: string; h: string }[] = [
   { id: "mangrove", top: "16%", left: "4%", w: "24%", h: "38%" },
@@ -79,6 +80,7 @@ export function Explore() {
             <p className="mt-3 text-[12px] text-white/50">
               Vida {Math.round(life)}% · {found}/{total} espécies
             </p>
+            <p className="mt-2 font-serif text-sm text-white/45 italic">{habitatRestoration(selected, life).label}</p>
             <button
               onClick={() => setView("setup")}
               className="mt-5 border border-white/20 px-8 py-2.5 text-[11px] tracking-[0.28em] text-white/80 uppercase hover:border-white/40"

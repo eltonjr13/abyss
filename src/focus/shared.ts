@@ -101,7 +101,11 @@ export class FocusConnection {
       if (this.completionCursor) query = query.gte("completed_at", this.completionCursor);
       const { data, error } = await query;
       if (error) throw error;
-      completed.push(...data as FocusRow[]);
+      const rows = data as FocusRow[];
+      if (rows.some(row => row.user_id !== this.userId || row.status !== "completed" || !row.completed_at)) {
+        throw new Error("Histórico da conta inválido");
+      }
+      completed.push(...rows);
       if (data.length < 100) break;
     }
     if (completed.length) this.completionCursor = completed[completed.length - 1].completed_at;

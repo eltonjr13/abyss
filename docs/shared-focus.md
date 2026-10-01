@@ -2,9 +2,9 @@
 
 ## Contrato
 
-Uma conta possui no máximo uma sessão ativa. App Android, popup e aba do oceano compartilham início, pausa, retomada e término. A duração pode ser de 1 a 180 minutos ou sem limite. Uma sessão concluída exige pelo menos um minuto de foco; encerrar antes disso a descarta. O usuário sem conta continua usando o timer local do app.
+Uma conta possui no máximo uma sessão ativa. App Android, popup e aba do oceano compartilham início, pausa, retomada e término. A duração pode ser de 1 a 180 minutos ou sem limite. Uma sessão concluída exige pelo menos um minuto de foco; encerrar antes disso a descarta. Iniciar um mergulho exige uma conta Google verificada, o histórico inicial carregado e a conexão com o timer pronta. Sem conta, a pessoa pode conhecer o oceano e acessar o convite de login, mas não inicia um timer nem ganha novas descobertas.
 
-Uma sessão local existente não é substituída ao entrar na conta. Ela deve ser finalizada primeiro. A nova versão lê o save V2 existente e preserva os dados locais. Ao sair da conta, uma sessão compartilhada é retirada da tela, mas continua na conta. Sair de um aparelho não encerra o login dos outros.
+O save V2 antigo permanece preservado; seus timers locais não são retomados para gerar novas recompensas. Cada conta usa um cache próprio, identificado pelo dono, sem copiar automaticamente a coleção antiga sem dono. Ao sair ou trocar de conta, o timer é retirado da tela e a coleção da outra conta não é exibida. A sessão compartilhada continua no servidor. Sair de um aparelho não encerra o login dos outros.
 
 Comandos de sessões compartilhadas precisam de internet. Sem conexão, o relógio continua a partir do último estado confirmado. Pausas feitas em outro aparelho só aparecem quando a conexão retorna. Não há fila automática de comandos offline: a pessoa recebe o estado atual e pode tentar novamente.
 
@@ -16,7 +16,7 @@ Comandos de sessões compartilhadas precisam de internet. Sem conexão, o relóg
 
 O cliente usa uma fila para comandos e consultas, compensa a diferença entre relógios e recarrega após reconexão. Realtime é habilitado para `focus_sessions`; cada conta assina apenas seus eventos. Histórico de conclusões é paginado e aplicado por ID, persistido junto ao save para evitar recompensa duplicada após reiniciar. Histórico antigo recebido com atraso preserva a sequência e a contagem diária já existentes.
 
-O oceano continua salvo por instalação. Uma conclusão compartilhada pode gerar progresso em cada instalação, uma vez em cada uma, mas isso não torna os saves completos idênticos. Nenhum campo Plus é transportado por esta integração.
+O oceano usa uma cópia local por conta. O histórico confirmado é aplicado em ordem cronológica, com sorteio determinístico por ID da sessão e controle de IDs já aplicados. Uma instalação nova recupera as conquistas geradas por esse histórico; reconectar e recarregar não premiam a mesma sessão duas vezes. Preferências, Plus, importações manuais e progresso anterior sem dono não são sincronizados por esse mecanismo. A definição de colecionáveis imutáveis e sua emissão no servidor continuam como trabalho futuro.
 
 ## Extensão
 

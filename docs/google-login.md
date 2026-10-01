@@ -1,6 +1,6 @@
 # Contas Mergulhe: Google e perfil básico
 
-O app continua utilizável sem conta. Entrar com Google cria um usuário no Supabase Auth e uma linha em `public.profiles` com `id`, nome de exibição e data de criação. O e-mail permanece no Auth. Na versão 1.1, a conta conecta o timer ao celular e à extensão; o progresso completo do oceano continua no dispositivo. Veja `docs/shared-focus.md`.
+Conhecer o app não exige conta, mas iniciar um mergulho exige login Google verificado e conexão pronta com as sessões. Entrar com Google cria um usuário no Supabase Auth e uma linha em `public.profiles` com `id`, nome de exibição e data de criação. O e-mail permanece no Auth. O timer conecta celular e extensão; o progresso usa caches separados por conta, e as conquistas de sessões confirmadas podem ser recuperadas pelo histórico. Veja `docs/shared-focus.md`.
 
 ## Estado atual
 

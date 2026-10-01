@@ -4,9 +4,12 @@ import { useGame } from "../game/GameContext";
 import { elapsedSeconds, MIN_REWARD_SECONDS } from "../game/session";
 import { formatTimer } from "../lib/format";
 import { notifySessionComplete, requestNotificationPermission } from "../lib/notifications";
+import { useAuth } from "../auth/AuthContext";
 
 export function Focus() {
   const { session, pauseSession, resumeSession, completeSession, abandonSession, syncBusy, syncMessage } = useGame();
+  const { user, verified, busy: authBusy } = useAuth();
+  const controlsBlocked = syncBusy || !verified || authBusy || session?.sharedUserId !== user?.id;
   const [now, setNow] = useState(() => Date.now());
   const doneRef = useRef(false);
   const paused = session?.startedAt === null;
@@ -51,11 +54,11 @@ export function Focus() {
   }, []);
 
   useEffect(() => {
-    if (!session || !biome || planned === null || remaining !== 0 || doneRef.current || syncBusy) return;
+    if (!session || !biome || planned === null || remaining !== 0 || doneRef.current || controlsBlocked) return;
     doneRef.current = true;
     notifySessionComplete(biome.name, Math.round((planned ?? elapsed) / 60));
     completeSession();
-  }, [session, planned, remaining, completeSession, biome, elapsed, syncBusy]);
+  }, [session, planned, remaining, completeSession, biome, elapsed, controlsBlocked]);
 
   useEffect(() => {
     document.title = session
@@ -66,7 +69,7 @@ export function Focus() {
     };
   }, [session, elapsed, remaining]);
 
-  if (!session || !biome) return null;
+  if (!session || !biome || session.sharedUserId !== user?.id) return null;
 
   const canEarn = elapsedSeconds(session, Date.now()) >= MIN_REWARD_SECONDS;
   const end = () => {
@@ -92,14 +95,14 @@ export function Focus() {
         {paused && <p className="font-serif text-sm text-white/60 italic">O tempo está em suspenso.</p>}
         <button
           onClick={paused ? resumeSession : pauseSession}
-          disabled={Boolean(session.sharedUserId && syncBusy)}
+          disabled={controlsBlocked}
           className="min-h-12 w-full border border-white/30 px-5 py-3 text-[11px] tracking-[0.28em] text-white/85 uppercase hover:border-white/50"
         >
           {paused ? "Retomar" : "Pausar"}
         </button>
         <button
           onClick={end}
-          disabled={Boolean(session.sharedUserId && syncBusy)}
+          disabled={controlsBlocked}
           className="min-h-11 px-4 text-[11px] tracking-[0.18em] text-white/60 uppercase hover:text-white/85"
         >
           {canEarn ? "Encerrar sessão" : "Descartar sessão"}

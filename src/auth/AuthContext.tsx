@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { Capacitor } from "@capacitor/core";
 import { App } from "@capacitor/app";
@@ -18,11 +18,13 @@ interface AuthValue {
   googleEnabled: boolean;
   loading: boolean;
   busy: boolean;
+  verified: boolean;
   user: User | null;
   profile: Profile | null;
   error: string | null;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  refreshAccount: () => void;
 }
 
 const AuthContext = createContext<AuthValue | null>(null);
@@ -40,6 +42,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(Boolean(supabase));
   const [busy, setBusy] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const refreshRef = useRef<(() => void) | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -50,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function refresh() {
       const current = ++sequence;
+      setVerified(false);
       const { data: sessionData, error: sessionError } = await client.auth.getSession();
       if (!active || current !== sequence) return;
       if (sessionError || !sessionData.session) {
@@ -64,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (authError || !data.user) {
         // Keep the cached account while offline; never turn its timer into a guest timer.
         setUser(sessionData.session.user);
+        setProfile(current => current?.id === sessionData.session!.user.id ? current : null);
         setError(authError ? "Não foi possível verificar sua conta. Tente novamente com internet." : null);
         setLoading(false);
         return;
@@ -71,6 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const signedInUser = data.user;
       setUser(signedInUser);
+      setProfile(current => current?.id === signedInUser.id ? current : null);
+      setVerified(!signedInUser.is_anonymous);
       const { data: existing, error: selectError } = await client
         .from("profiles")
         .select("id, display_name")
@@ -105,8 +113,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     void refresh();
+    refreshRef.current = () => { void refresh(); };
     const { data: { subscription } } = client.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") { setUser(null); setProfile(null); setVerified(false); }
       if (event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") return;
+      setVerified(false);
       // Wait until Supabase releases its auth lock before querying Auth/PostgREST.
       setTimeout(() => { if (active) void refresh(); }, 0);
     });
@@ -122,6 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       active = false;
+      refreshRef.current = null;
       subscription.unsubscribe();
       chrome?.storage.onChanged.removeListener(storageChanged);
       window.removeEventListener("online", reconnect);
@@ -210,9 +222,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={{
-      configured: Boolean(supabase), loading, busy, user, profile, error,
+      configured: Boolean(supabase), loading, busy, verified, user, profile, error,
       googleEnabled,
       signInWithGoogle, signOut,
+      refreshAccount: () => refreshRef.current?.(),
     }}>
       {children}
     </AuthContext.Provider>

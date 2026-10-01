@@ -13,14 +13,14 @@ import type { ActiveSession, AudioSettings, BiomeId, GameState, Rewards, ViewId 
 import { getAudio } from "../audio/engine";
 import { FOCUS_QUOTES, pick } from "../data/quotes";
 import { todayKey } from "../lib/format";
-import { persistSnapshot } from "./save";
-import { elapsedSeconds, MIN_REWARD_SECONDS } from "./session";
+import { loadSnapshot, persistSnapshot } from "./save";
 import { gameReducer, initialGameData } from "./store";
 import { useAuth } from "../auth/AuthContext";
 import { Capacitor } from "@capacitor/core";
 import { extensionChrome } from "../platform/chrome";
 import { useSharedFocus } from "../focus/useSharedFocus";
 import { isActive, type FocusCommand, type FocusSnapshot } from "../focus/shared";
+import { canStartDive } from "../focus/access";
 
 interface GameContextValue {
   state: GameState;
@@ -29,6 +29,7 @@ interface GameContextValue {
   session: ActiveSession | null;
   rewards: Rewards | null;
   syncBusy: boolean;
+  canDive: boolean;
   syncMessage: string | null;
   selectedSpecies: string | null;
   setSelectedSpecies: (id: string | null) => void;
@@ -51,7 +52,7 @@ const GameContext = createContext<GameContextValue | null>(null);
 export function GameProvider({ children }: { children: ReactNode }) {
   const [data, dispatch] = useReducer(gameReducer, undefined, initialGameData);
   const { state, session, rewards } = data;
-  const { user, loading: authLoading, error: authError } = useAuth();
+  const { user, verified, busy: authBusy, loading: authLoading } = useAuth();
   const currentData = useRef(data);
   currentData.current = data;
   const [view, setView] = useState<ViewId>(() =>
@@ -59,40 +60,52 @@ export function GameProvider({ children }: { children: ReactNode }) {
   );
   const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
   const announcedRewards = useRef(new Set(data.appliedSharedSessions ?? []));
+  const syncedAccount = useRef<string | null>(null);
   const acceptShared = useCallback((snapshot: FocusSnapshot) => {
-    if (!user || (currentData.current.session && !currentData.current.session.sharedUserId)) return;
+    if (!user || currentData.current.accountId !== user.id) return;
     const newlyCompleted = snapshot.completed.filter((row) => row.user_id === user.id &&
       !announcedRewards.current.has(row.id));
     for (const row of newlyCompleted) announcedRewards.current.add(row.id);
-    const hasReward = newlyCompleted.length > 0;
+    const firstSync = syncedAccount.current !== user.id;
+    const hasReward = newlyCompleted.length > 0 && (!firstSync || newlyCompleted.some(row => row.id === currentData.current.session?.id));
+    syncedAccount.current = user.id;
     dispatch({ type: "shared", snapshot, userId: user.id, now: Date.now() });
     if (isActive(snapshot.row)) setView("focus");
     else if (hasReward) { setView("complete"); getAudio().chime(); }
     else if (currentData.current.session?.sharedUserId) setView("home");
   }, [user]);
   const shared = useSharedFocus(user?.id ?? null, acceptShared);
-  const syncBusy = authLoading || Boolean(session?.sharedUserId && !user) ||
-    Boolean(user && (!shared.snapshot?.connected || shared.snapshot.busy));
-  const syncMessage = authLoading ? "Verificando sua conta…" : session && !session.sharedUserId && user
-    ? "Finalize esta sessão local para conectar o timer à sua conta."
+  const accountReady = data.accountId === (user?.id ?? null);
+  const syncBusy = authLoading || !accountReady || Boolean(session?.sharedUserId && !user) ||
+    Boolean(user && (!shared.snapshot?.connected || shared.snapshot.busy || syncedAccount.current !== user.id));
+  const canDive = canStartDive({ userId: user?.id ?? null, accountId: data.accountId ?? null, verified,
+    authLoading, authBusy, connected: shared.connection.current?.userId === user?.id && Boolean(shared.snapshot?.connected), syncBusy });
+  const syncMessage = authLoading || !accountReady ? "Verificando sua conta…" : user && !verified
+    ? "Verifique sua conta com internet antes de mergulhar."
     : shared.snapshot?.error ?? (user ? shared.snapshot?.connected
-      ? "Timer conectado à sua conta." : "Conectando seu timer…" : null);
+      ? "Sessões conectadas à sua conta." : "Conectando suas sessões…" : "Conecte sua conta para mergulhar e registrar suas descobertas.");
 
   useEffect(() => {
-    if (authLoading || (!user && authError)) return;
-    if (currentData.current.session?.sharedUserId && currentData.current.session.sharedUserId !== user?.id) {
-      dispatch({ type: "detach_shared" });
-      setView("home");
+    if (authLoading || currentData.current.accountId === (user?.id ?? null)) return;
+    const snapshot = loadSnapshot(Date.now(), user?.id);
+    announcedRewards.current = new Set(snapshot.appliedSharedSessions ?? []);
+    syncedAccount.current = null;
+    dispatch({ type: "account", accountId: user?.id ?? null, snapshot });
+    setSelectedSpecies(null);
+    setView(snapshot.state.seenOnboarding ? "home" : "onboarding");
+  }, [user?.id, authLoading]);
+
+  useEffect(() => {
+    if (!authLoading && accountReady && user && (!session || syncedAccount.current !== user.id)) {
+      void shared.connection.current?.refresh().catch(() => undefined);
     }
-  }, [user?.id, authLoading, authError]);
+  }, [authLoading, accountReady, data.accountId, session?.id, user?.id, shared.connection]);
 
   useEffect(() => {
-    if (!session && user) void shared.connection.current?.refresh().catch(() => undefined);
-  }, [session?.id, user?.id, shared.connection]);
-
-  useEffect(() => {
-    persistSnapshot({ state, session, appliedSharedSessions: data.appliedSharedSessions });
-  }, [state, session, data.appliedSharedSessions]);
+    if (authLoading || !accountReady) return;
+    if (data.accountId) persistSnapshot({ state, session, appliedSharedSessions: data.appliedSharedSessions }, data.accountId);
+    else persistSnapshot({ ...loadSnapshot(), state });
+  }, [state, session, data.appliedSharedSessions, data.accountId, accountReady, authLoading]);
 
   useEffect(() => {
     const refresh = () => dispatch({ type: "day", today: todayKey() });
@@ -111,9 +124,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const finishOnboarding = useCallback(() => {
     dispatch({ type: "onboarding" });
+    if (!user) persistSnapshot({ ...loadSnapshot(), state: { ...state, seenOnboarding: true } });
     setView("home");
     void getAudio().start(state.currentBiome);
-  }, [state.currentBiome]);
+  }, [state, user]);
 
   const selectBiome = useCallback((id: BiomeId) => {
     if (!state.unlockedBiomes.includes(id)) return;
@@ -123,48 +137,36 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const startSession = useCallback((seconds: number | null) => {
     if (seconds !== null && (!Number.isInteger(seconds) || seconds < 60 || seconds > 180 * 60)) return;
-    if (authLoading || currentData.current.session) return;
-    if (user) {
-      const origin = Capacitor.isNativePlatform() ? "mobile" : extensionChrome() ? "extension" : "web";
-      void shared.connection.current?.start(seconds, state.currentBiome, pick(FOCUS_QUOTES), origin)
-        .then(() => { void getAudio().start(state.currentBiome); }).catch(() => undefined);
-      return;
-    }
-    dispatch({ type: "start", seconds, quote: pick(FOCUS_QUOTES), now: Date.now() });
-    setView("focus");
-    void getAudio().start(state.currentBiome);
-  }, [state.currentBiome, authLoading, user, shared.connection]);
+    const connection = shared.connection.current;
+    if (!canDive || !user || currentData.current.accountId !== user.id || connection?.userId !== user.id ||
+      !connection.snapshot.connected || connection.snapshot.busy || currentData.current.session) return;
+    const origin = Capacitor.isNativePlatform() ? "mobile" : extensionChrome() ? "extension" : "web";
+    void connection.start(seconds, state.currentBiome, pick(FOCUS_QUOTES), origin)
+      .then(() => { if (currentData.current.accountId === user.id) void getAudio().start(state.currentBiome); }).catch(() => undefined);
+  }, [state.currentBiome, canDive, user, shared.connection]);
 
   const sharedCommand = useCallback((command: FocusCommand) => {
-    if (!currentData.current.session?.sharedUserId) return false;
-    void shared.connection.current?.command(command).catch(() => undefined);
-    return true;
-  }, [shared.connection]);
+    const connection = shared.connection.current;
+    if (!user || !verified || authBusy || currentData.current.accountId !== user.id ||
+      currentData.current.session?.sharedUserId !== user.id || connection?.userId !== user.id ||
+      !connection.snapshot.connected || connection.snapshot.busy) return;
+    void connection.command(command).catch(() => undefined);
+  }, [user, verified, authBusy, shared.connection]);
 
   const pauseSession = useCallback(() => {
-    if (sharedCommand("pause")) return;
-    dispatch({ type: "pause", now: Date.now() });
+    sharedCommand("pause");
   }, [sharedCommand]);
 
   const resumeSession = useCallback(() => {
-    if (sharedCommand("resume")) return;
-    dispatch({ type: "resume", now: Date.now() });
+    sharedCommand("resume");
   }, [sharedCommand]);
 
   const completeSession = useCallback(() => {
-    if (!session) return;
-    if (sharedCommand("complete")) return;
-    const now = Date.now();
-    if (elapsedSeconds(session, now) < MIN_REWARD_SECONDS) return;
-    dispatch({ type: "complete", id: session.id, now });
-    setView("complete");
-    getAudio().chime();
-  }, [session, sharedCommand]);
+    sharedCommand("complete");
+  }, [sharedCommand]);
 
   const abandonSession = useCallback(() => {
-    if (sharedCommand("abandon")) return;
-    dispatch({ type: "abandon" });
-    setView("home");
+    sharedCommand("abandon");
   }, [sharedCommand]);
 
   const setAudio = useCallback((audio: AudioSettings) => {
@@ -200,6 +202,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       session,
       rewards,
       syncBusy,
+      canDive,
       syncMessage,
       selectedSpecies,
       setSelectedSpecies,
@@ -222,6 +225,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       session,
       rewards,
       syncBusy,
+      canDive,
       syncMessage,
       selectedSpecies,
       finishOnboarding,
@@ -239,7 +243,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     ],
   );
 
-  return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
+  return <GameContext.Provider value={value}>{accountReady ? children :
+    <div role="status" className="flex min-h-dvh items-center justify-center bg-[#061018] text-white/70">Carregando seu oceano…</div>}
+  </GameContext.Provider>;
 }
 
 export function useGame() {

@@ -2,7 +2,7 @@ import { useAuth } from "../auth/AuthContext";
 import { useGame } from "../game/GameContext";
 
 export function AccountCard() {
-  const { configured, googleEnabled, loading, busy, user, profile, error, signInWithGoogle, signOut } = useAuth();
+  const { configured, googleEnabled, loading, busy, verified, user, profile, error, signInWithGoogle, signOut, refreshAccount } = useAuth();
   const { syncMessage } = useGame();
 
   return (
@@ -16,6 +16,10 @@ export function AccountCard() {
             {profile?.display_name ?? "Conta Google conectada"}
           </p>
           <p className="mt-1 break-all text-xs text-white/65">{user.email}</p>
+          {!verified && <button type="button" disabled={busy} onClick={refreshAccount}
+            className="mt-3 min-h-11 border border-[var(--gold)]/40 px-4 text-xs text-[var(--gold)] disabled:opacity-50">
+            Verificar conta novamente
+          </button>}
           <button
             type="button"
             disabled={busy}
@@ -32,7 +36,7 @@ export function AccountCard() {
       ) : (
         <>
           <p className="mt-3 text-xs leading-relaxed text-white/70">
-            Entre com sua conta Google para criar seu perfil no Mergulhe.
+            Entre com sua conta Google para mergulhar e registrar suas descobertas.
           </p>
           <button
             type="button"
@@ -46,8 +50,8 @@ export function AccountCard() {
       )}
       {error && <p className="mt-3 text-xs text-rose-300" role="alert">{error}</p>}
       <p className="mt-4 text-[10px] leading-relaxed text-white/50">
-        {user ? syncMessage : "Entre com a mesma conta no celular e na extensão para conectar o timer."}
-        {" "}O progresso do oceano permanece neste dispositivo.
+        {user ? syncMessage : "Uma conta conectada é necessária para iniciar sessões."}
+        {" "}As sessões confirmadas ficam na sua conta. Este dispositivo guarda uma cópia do progresso.
       </p>
     </section>
   );

@@ -26,7 +26,7 @@ O Google continua usando o provider e o callback do Supabase já configurados. A
 - Offline, o último timer continua sendo exibido; comandos exigem uma nova confirmação do servidor. O badge `!` indica sincronização indisponível.
 - Sair da conta limpa o cache e os alarmes da extensão, mantendo a sessão da conta disponível no celular.
 
-Os botões de 15, 25, 45 minutos e “Sem timer” iniciam a sessão da conta. Não há um segundo cronômetro independente. Uma sessão antiga do app, iniciada sem conta, pode ser finalizada localmente antes de usar a sessão compartilhada.
+Os botões de 15, 25, 45 minutos e “Sem timer” iniciam a sessão da conta. O app também exige conta verificada antes de iniciar um mergulho. Timers locais antigos permanecem no save legado, mas não são retomados para gerar novas recompensas; a coleção usa um cache separado por conta e recupera as conquistas das sessões confirmadas pelo histórico.
 
 As conclusões são registradas por ID e aplicadas uma vez em cada instalação do app. A sincronização completa do oceano e a validação de compras continuam sendo etapas próprias; o timer não copia nem concede Plus.
 

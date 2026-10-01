@@ -4,9 +4,12 @@ import { IDLE_WHISPERS } from "../data/quotes";
 import { useGame } from "../game/GameContext";
 import { overallLife } from "../game/save";
 import { formatHours } from "../lib/format";
+import { habitatRestoration } from "../ocean/restoration";
+import { useAuth } from "../auth/AuthContext";
 
 export function Home() {
   const { state, setView } = useGame();
+  const { user } = useAuth();
   const biome = BIOMES[state.currentBiome];
   const life = state.biomeLife[state.currentBiome] ?? 0;
   const tod = getTimeOfDay();
@@ -37,12 +40,13 @@ export function Home() {
         <p className="mt-2 text-[11px] tracking-[0.18em] text-white/50">
           Vida {Math.round(life)}%
         </p>
+        <p className="mt-2 font-serif text-sm text-white/45 italic">{habitatRestoration(state.currentBiome, life).label}</p>
 
         <button
           onClick={() => setView("setup")}
           className="mt-8 min-h-12 w-full border border-white/25 bg-[#071018]/35 py-4 text-[13px] tracking-[0.3em] text-[var(--foam)] uppercase backdrop-blur-sm hover:border-white/50 hover:bg-white/10 sm:tracking-[0.46em]"
         >
-          Mergulhar
+          {user ? "Mergulhar" : "Conectar conta para mergulhar"}
         </button>
 
         <div className="mt-6 flex items-center justify-center gap-5 text-[11px] tracking-wide text-white/55">

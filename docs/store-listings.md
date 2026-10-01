@@ -17,7 +17,7 @@ Mergulhe transforma sessões de estudo e trabalho em progresso num mundo marinho
 - Timer com durações prontas, duração personalizada e modo sem timer.
 - Seis biomas para explorar e dezenas de espécies para descobrir.
 - Paisagens sonoras geradas pelo app e controles de áudio.
-- Histórico de foco e progresso salvos no dispositivo.
+- Conta Google necessária para iniciar mergulhos; sessões confirmadas ficam associadas à conta, com uma cópia local do progresso.
 - Backup e importação manual para levar o oceano a outro aparelho.
 
 O essencial de foco, biomas e descobertas é gratuito. A compra Mergulhe Plus ainda não está disponível; não anuncie preço ou benefícios pagos como entregues antes da integração com as lojas.
@@ -32,7 +32,7 @@ O essencial de foco, biomas e descobertas é gratuito. A compra Mergulhe Plus ai
 
 Mergulhe é um espaço de foco com um oceano virtual que responde à sua constância. Inicie uma sessão, acompanhe o tempo e descubra novas formas de vida no seu mundo marinho.
 
-Explore seis biomas, descubra espécies, ajuste a paisagem sonora e veja seu histórico. Seu progresso fica no aparelho; para levá-lo a outro, use o backup e a importação manual. Entrar com Google cria um perfil, mas ainda não sincroniza o progresso automaticamente.
+Explore seis biomas, descubra espécies, ajuste a paisagem sonora e veja seu histórico. Conecte sua conta Google para iniciar mergulhos. As sessões confirmadas permitem recuperar suas conquistas; preferências e importações manuais continuam locais. O backup e a importação permanecem disponíveis.
 
 Não prometer Dynamic Island, integração com tela bloqueada, sincronização automática ou efeitos terapêuticos sem implementação e testes nas versões nativas.
 
@@ -56,4 +56,4 @@ O botão **Ver o Oceano Completo** abre, em outra aba, o app Mergulhe empacotado
 4. Mostrar descoberta de espécie e histórico com dados de demonstração identificados como tal.
 5. Revalidar declarações de dados, permissões, privacidade, preços e disponibilidade de cada loja com o build final.
 
-O login Google usa Supabase Auth e guarda um perfil básico no banco; por isso, não declarar “nenhum dado coletado”. O progresso do oceano permanece local enquanto não existir sincronização automática implementada. Hospede as páginas públicas de privacidade e suporte em `mergulhe.cloud` antes de enviar as listagens.
+O login Google usa Supabase Auth e guarda um perfil básico e as sessões de foco no banco; por isso, não declarar “nenhum dado coletado”. O progresso usa um cache local por conta e recupera as conquistas pelo histórico confirmado; isso não sincroniza preferências, Plus ou importações manuais. Hospede as páginas públicas de privacidade e suporte em `mergulhe.cloud` antes de enviar as listagens.

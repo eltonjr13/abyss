@@ -87,23 +87,24 @@ function PrivacyContent() {
   return (
     <>
       <div className="rounded-lg border border-emerald-400/20 bg-emerald-950/20 p-3 text-[11px] text-emerald-300 leading-relaxed">
-        <strong>Privacidade por padrão:</strong> O Mergulhe armazena todo o seu histórico de foco e
-        progresso localmente no seu aparelho. Não vendemos seus dados nem exibimos anúncios de terceiros.
+        <strong>Privacidade por padrão:</strong> O Mergulhe associa suas sessões de foco à sua conta e
+        guarda uma cópia do progresso no aparelho. Não vendemos seus dados nem exibimos anúncios de terceiros.
       </div>
 
       <section>
         <h3 className="font-serif text-sm text-[var(--foam)] font-semibold">1. Princípios de Privacidade</h3>
         <p className="mt-1 text-white/70">
-          Operamos sob o princípio da minimização de dados. O uso do aplicativo é possível de forma 100%
-          anônima sem criação de conta. Cumprimos integralmente a LGPD (Lei nº 13.709/2018) e o GDPR (Regulamento UE 2016/679).
+          Operamos sob o princípio da minimização de dados. Você pode conhecer o aplicativo sem conta;
+          para iniciar mergulhos e registrar novas descobertas, é necessário conectar sua conta Google.
         </p>
       </section>
 
       <section>
         <h3 className="font-serif text-sm text-[var(--foam)] font-semibold">2. Dados Coletados</h3>
         <ul className="mt-1 list-disc list-inside space-y-1 text-white/70">
-          <li><strong>Uso Local:</strong> Tempo de foco, biomas, XP e espécies ficam gravados no seu dispositivo (`localStorage`).</li>
-          <li><strong>Login com Google (Opcional):</strong> Armazena ID único, e-mail e nome de exibição no Supabase para autenticação.</li>
+          <li><strong>Sessões de Foco:</strong> Bioma, duração, início, pausas e conclusão são registrados no Supabase e associados à sua conta.</li>
+          <li><strong>Progresso no Aparelho:</strong> Biomas, XP e espécies são armazenados em uma cópia local separada por conta. O histórico de sessões confirmadas permite recuperar as conquistas dessas sessões.</li>
+          <li><strong>Login com Google:</strong> Usa ID único, e-mail e nome de exibição para autenticação; o perfil básico fica no Supabase.</li>
           <li><strong>Mergulhe Plus:</strong> Transações processadas pelas lojas oficiais (Google Play e Apple App Store). Não coletamos nem armazenamos dados de cartão de crédito.</li>
         </ul>
       </section>

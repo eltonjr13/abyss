@@ -1,6 +1,7 @@
 import { IMAGES, getBiomeImageSources } from "../assets/images";
 import { BIOMES } from "../data/biomes";
-import { discoveredSpeciesOfBiome } from "../data/species";
+import { oceanPopulation } from "./population";
+import { habitatRestoration } from "./restoration";
 import type { BiomeId, ShapeId, TimeOfDay } from "../types";
 import { getSpriteCanvas } from "./sprites";
 import { creaturePose, locomotion } from "./creature-motion";
@@ -183,7 +184,7 @@ export class OceanEngine {
   setConfig(partial: Partial<OceanConfig>) {
     const next = { ...this.config, ...partial };
     const biomeChanged = next.biome !== this.config.biome;
-    const lifeChanged = Math.abs(next.life - this.config.life) > 0.5;
+    const lifeChanged = next.life !== this.config.life;
     const todChanged = next.timeOfDay !== this.config.timeOfDay;
     const creaturesChanged = next.showCreatures !== this.config.showCreatures;
     const discoveriesChanged = next.discovered !== this.config.discovered;
@@ -257,7 +258,7 @@ export class OceanEngine {
     const rng = mulberry32(biome.length * 97 + Math.floor(life) * 13);
     const night = timeOfDay === "night";
 
-    const plantCount = Math.floor(3 + (life / 100) * 18);
+    const plantCount = habitatRestoration(biome, life).plants;
     this.plants = [];
     for (let i = 0; i < plantCount; i++) {
       this.plants.push({
@@ -281,11 +282,9 @@ export class OceanEngine {
       });
     }
 
-    const pool = discoveredSpeciesOfBiome(biome, this.config.discovered);
-    const fishCount = this.config.showCreatures === false || pool.length === 0 ? 0 : Math.floor(2 + (life / 100) * (night ? 10 : 16));
+    const population = this.config.showCreatures === false ? [] : oceanPopulation(biome, this.config.discovered, life, timeOfDay);
     this.fish = [];
-    for (let i = 0; i < fishCount; i++) {
-      const spec = pool[Math.floor(rng() * pool.length)]!;
+    for (const spec of population) {
       const dir = rng() > 0.5 ? 1 : -1;
       const z = rng();
       const mode = locomotion(spec.shape, spec.id);
@@ -463,15 +462,23 @@ export class OceanEngine {
       abyss: IMAGES.abyss,
     };
     const img = get(map[biome]);
-    if (img) x.drawImage(img, 0, 0, bgW, bgH);
+    const restoration = habitatRestoration(biome, life);
+    if (img) {
+      x.save();
+      x.filter = `saturate(${restoration.saturation}) brightness(${restoration.brightness})`;
+      x.drawImage(img, 0, 0, bgW, bgH);
+      x.restore();
+    }
     else {
       x.fillStyle = BIOMES[biome].palette.deep;
       x.fillRect(0, 0, bgW, bgH);
     }
-    // Saturation affects the scenery before the transparent fauna layer.
+    // Sediment recedes with recovery; fauna stays on its own transparent layer.
     x.save();
-    x.globalCompositeOperation = "saturation";
-    x.fillStyle = `rgba(128,128,128,${0.65 * (1 - life / 100)})`;
+    const haze = x.createLinearGradient(0, 0, 0, bgH);
+    haze.addColorStop(0, `rgba(68,83,79,${restoration.sediment * 0.25})`);
+    haze.addColorStop(1, `rgba(68,83,79,${restoration.sediment})`);
+    x.fillStyle = haze;
     x.fillRect(0, 0, bgW, bgH);
     x.restore();
   }
@@ -655,10 +662,11 @@ export class OceanEngine {
     const { biome, life } = this.config;
     if (life < 6) return;
     const pal = BIOMES[biome].palette;
+    const growth = habitatRestoration(biome, life).plantGrowth;
     for (const p of this.plants) {
       const isFore = p.x % 2 < 1;
       if (foreground !== isFore) continue;
-      const h = p.h * (0.45 + (life / 100) * 0.55);
+      const h = p.h * growth;
       const time = this.reduced ? 0 : this.t;
       const flow = waterCurrent(biome, time, H - h * 0.5);
       for (let i = 0; i < h; i++) {

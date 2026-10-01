@@ -189,17 +189,24 @@ function hydrateSession(raw: unknown, state: GameState, now: number): ActiveSess
   };
 }
 
-export function loadSnapshot(now = Date.now()): SaveSnapshot {
+export function loadSnapshot(now = Date.now(), accountId?: string): SaveSnapshot {
   try {
-    const saved = localStorage.getItem(KEY);
+    const saved = localStorage.getItem(accountId ? `${KEY}:account:${accountId}` : KEY);
     if (saved) {
       const parsed = record(JSON.parse(saved));
-      if (parsed.version === 2) {
+      if (parsed.version === 2 && (!accountId || parsed.accountId === accountId)) {
         const state = hydrate(parsed.state, now);
-        return { state, session: hydrateSession(parsed.session, state, now),
+        const session = hydrateSession(parsed.session, state, now);
+        return { state, session: accountId && session?.sharedUserId !== accountId ? null : session,
           appliedSharedSessions: Array.isArray(parsed.appliedSharedSessions)
             ? parsed.appliedSharedSessions.filter((id): id is string => typeof id === "string") : [] };
       }
+    }
+    if (accountId) {
+      // Keep the unbound legacy save intact; only device preferences carry over.
+      const legacy = loadSnapshot(now);
+      return { state: { ...freshState(now), seenOnboarding: legacy.state.seenOnboarding,
+        audio: { ...legacy.state.audio }, plus: { ...legacy.state.plus } }, session: null, appliedSharedSessions: [] };
     }
     const legacy = localStorage.getItem(LEGACY_KEY);
     return { state: legacy ? hydrate(JSON.parse(legacy), now) : freshState(now), session: null };
@@ -208,10 +215,11 @@ export function loadSnapshot(now = Date.now()): SaveSnapshot {
   }
 }
 
-export function persistSnapshot(snapshot: SaveSnapshot): void {
+export function persistSnapshot(snapshot: SaveSnapshot, accountId?: string): void {
   try {
-    localStorage.setItem(KEY, JSON.stringify({ version: 2, ...snapshot }));
-    localStorage.removeItem(LEGACY_KEY);
+    const key = accountId ? `${KEY}:account:${accountId}` : KEY;
+    localStorage.setItem(key, JSON.stringify({ version: 2, ...snapshot, ...(accountId ? { accountId } : {}) }));
+    if (!accountId) localStorage.removeItem(LEGACY_KEY);
   } catch {
     /* Storage can be unavailable or full; the current session remains in memory. */
   }
