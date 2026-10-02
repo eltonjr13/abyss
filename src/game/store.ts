@@ -4,6 +4,7 @@ import { applySession } from "./progress";
 import { freshState, loadSnapshot, refreshDay, type SaveSnapshot } from "./save";
 import { createSession, elapsedSeconds, MIN_REWARD_SECONDS, pauseSessionAt, resumeSessionAt } from "./session";
 import { isActive, sessionFromRow, type FocusSnapshot } from "../focus/shared";
+import { SPECIES_BY_ID } from "../data/species";
 
 export interface GameData {
   state: GameState;
@@ -19,6 +20,7 @@ export type GameAction =
   | { type: "detach_shared" }
   | { type: "onboarding" }
   | { type: "biome"; id: BiomeId }
+  | { type: "target"; id: string | null }
   | { type: "start"; seconds: number | null; quote: string; now: number }
   | { type: "pause"; now: number }
   | { type: "resume"; now: number }
@@ -89,6 +91,9 @@ export function gameReducer(data: GameData, action: GameAction): GameData {
       return data.state.unlockedBiomes.includes(action.id)
         ? { ...data, state: { ...data.state, currentBiome: action.id } }
         : data;
+    case "target":
+      if (action.id !== null && (!SPECIES_BY_ID[action.id] || data.state.discovered.includes(action.id))) return data;
+      return { ...data, state: { ...data.state, targetSpecies: action.id } };
     case "start":
       if (data.session) return data;
       return {

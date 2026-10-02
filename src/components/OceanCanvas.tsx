@@ -7,7 +7,7 @@ import { cn } from "../utils/cn";
 export function OceanCanvas({ dimmed = false }: { dimmed?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<OceanEngine | null>(null);
-  const { state, view, session } = useGame();
+  const { state, view, session, highlightedSpecies } = useGame();
   const biome = view === "focus" && session ? session.biome : state.currentBiome;
   const intensity = view === "focus" ? 0.85 : 1;
 
@@ -20,6 +20,7 @@ export function OceanCanvas({ dimmed = false }: { dimmed?: boolean }) {
       timeOfDay: getTimeOfDay(),
       intensity,
       discovered: state.discovered,
+      highlightedSpecies: view === "home" ? highlightedSpecies : null,
     });
     engineRef.current = engine;
     void engine.init();
@@ -41,8 +42,9 @@ export function OceanCanvas({ dimmed = false }: { dimmed?: boolean }) {
       timeOfDay: getTimeOfDay(),
       intensity,
       discovered: state.discovered,
+      highlightedSpecies: view === "home" ? highlightedSpecies : null,
     });
-  }, [biome, state.biomeLife, state.discovered, intensity]);
+  }, [biome, state.biomeLife, state.discovered, intensity, view, highlightedSpecies]);
 
   return (
     <canvas

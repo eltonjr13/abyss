@@ -19,7 +19,7 @@ export function PixelCreature({
     const canvas = ref.current;
     if (!canvas) return;
     const palette = silhouette
-      ? species.palette.map(() => "#2a3a44")
+      ? species.palette.map(() => "#708a96")
       : species.palette;
     const ctx = canvas.getContext("2d")!;
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");

@@ -4,6 +4,7 @@ import { levelFromXp } from "../data/levels";
 import { clamp, shiftDateKey, todayKey } from "../lib/format";
 import type { BiomeId, GameState, Rewards } from "../types";
 import { MIN_REWARD_SECONDS } from "./session";
+import { collectionAchievements, encounterChance, researchRequired, suitableFocusSeconds } from "./collection";
 
 function lifeGainFor(seconds: number): number {
   const m = seconds / 60;
@@ -56,36 +57,36 @@ function rollDiscoveries(
   seconds: number,
   newLife: number,
   random: () => number,
-): string[] {
-  const minutes = seconds / 60;
+): { found: string[]; researchSeconds: Record<string, number>; researchGains: Record<string, number>; guaranteed: string[] } {
   const pending = SPECIES.filter(
     (s) => s.biome === biome && newLife >= s.minLife && !state.discovered.includes(s.id),
   );
-  if (!pending.length) return [];
-
-  const found: string[] = [];
-  const pity = { ...state.pity };
-
+  const researchSeconds = { ...state.researchSeconds };
+  const researchGains: Record<string, number> = {};
+  const guaranteed: string[] = [];
+  const found = new Set<string>();
   const ordered = [...pending].sort((a, b) => a.minLife - b.minLife);
-  const chance = clamp(0.42 + minutes * 0.008, 0.35, 0.92);
-
-  const tryOne = (list: typeof ordered) => {
-    if (!list.length) return;
-    const first = list[0]!;
-    const p = pity[first.id] ?? 0;
-    const guaranteed = p >= 2 || state.sessionsCompleted < 2;
-    if (guaranteed || random() < chance) {
-      found.push(first.id);
+  for (const species of ordered) {
+    const activeSeconds = suitableFocusSeconds(state.biomeLife[biome], species.minLife, seconds);
+    const previous = researchSeconds[species.id] ?? 0;
+    const next = Math.min(researchRequired(species), previous + activeSeconds);
+    researchSeconds[species.id] = next;
+    researchGains[species.id] = next - previous;
+    if (next >= researchRequired(species)) {
+      found.add(species.id);
+      guaranteed.push(species.id);
+    } else {
+      // Duration-based probability: splitting focus into tiny sessions gives no extra chance.
+      const chance = encounterChance(species, activeSeconds);
+      if (random() < chance) found.add(species.id);
     }
-  };
-
-  tryOne(ordered);
-  if (minutes >= 40 && found.length && random() < 0.28) {
-    const rest = ordered.filter((s) => s.id !== found[0]);
-    if (rest.length) found.push(rest[Math.floor(random() * rest.length)]!.id);
   }
-
-  return found;
+  // The first five accumulated minutes welcome the player with an eligible common species.
+  if (!state.discovered.length && state.totalFocusSeconds + seconds >= 5 * 60) {
+    const first = ordered.find(s => s.rarity === "comum");
+    if (first) found.add(first.id);
+  }
+  return { found: pending.filter(s => found.has(s.id)).map(s => s.id), researchSeconds, researchGains, guaranteed };
 }
 
 export function applySession(
@@ -105,7 +106,8 @@ export function applySession(
   const newLife = clamp(oldLife + gain, 0, 100);
   const oldLevel = levelFromXp(state.xp);
 
-  const discovered = rollDiscoveries(state, biome, safeSeconds, newLife, random);
+  const discoveries = rollDiscoveries(state, biome, safeSeconds, newLife, random);
+  const discovered = discoveries.found;
   const pity = { ...state.pity };
   for (const s of SPECIES.filter((sp) => sp.biome === biome && newLife >= sp.minLife && !state.discovered.includes(sp.id))) {
     if (discovered.includes(s.id)) delete pity[s.id];
@@ -125,6 +127,8 @@ export function applySession(
     discovered: [...state.discovered, ...discovered],
     history: updateHistory(state.history, today, safeSeconds),
     pity,
+    researchSeconds: discoveries.researchSeconds,
+    targetSpecies: state.targetSpecies && discovered.includes(state.targetSpecies) ? null : state.targetSpecies,
   };
 
   const newBiomes = unlockCheck(next);
@@ -136,6 +140,7 @@ export function applySession(
   }
 
   const newLevel = levelFromXp(next.xp);
+  const previousAchievements = new Set(collectionAchievements(state.discovered).filter(a => a.complete).map(a => a.id));
   const rewards: Rewards = {
     xp,
     lifeGain: Math.round((newLife - oldLife) * 10) / 10,
@@ -143,6 +148,11 @@ export function applySession(
     seconds: safeSeconds,
     newSpecies: discovered,
     newBiomes,
+    newAchievements: collectionAchievements(next.discovered)
+      .filter(a => a.complete && !previousAchievements.has(a.id))
+      .map(a => a.id),
+    researchGains: discoveries.researchGains,
+    guaranteedSpecies: discoveries.guaranteed,
     leveledUp: newLevel > oldLevel,
     oldLevel,
     newLevel,

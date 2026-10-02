@@ -95,6 +95,9 @@ export interface Rewards {
   seconds: number;
   newSpecies: string[];
   newBiomes: BiomeId[];
+  newAchievements: string[];
+  researchGains: Record<string, number>;
+  guaranteedSpecies: string[];
   leveledUp: boolean;
   oldLevel: number;
   newLevel: number;
@@ -133,6 +136,8 @@ export interface GameState {
   history: DayRecord[];
   audio: AudioSettings;
   pity: Record<string, number>;
+  targetSpecies: string | null;
+  researchSeconds: Record<string, number>;
   plus: PlusEntitlement;
 }
 

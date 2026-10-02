@@ -50,7 +50,7 @@ export function Onboarding() {
             </h2>
             <p className="mt-5 text-sm font-light leading-relaxed text-white/60">
               Cada minuto de concentração devolve um pouco de vida.
-              Não há nada para coletar. Só permanecer.
+              Descubra espécies, escolha sua próxima expedição e veja seu oceano ganhar novas cores.
             </p>
           </>
         )}

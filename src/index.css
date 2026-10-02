@@ -35,10 +35,12 @@ input {
   font-family: inherit;
 }
 
-button {
-  cursor: pointer;
-  background: transparent;
-  touch-action: manipulation;
+@layer base {
+  button {
+    cursor: pointer;
+    background: transparent;
+    touch-action: manipulation;
+  }
 }
 
 button:disabled {
@@ -57,6 +59,15 @@ input:focus-visible {
 
 .rise {
   animation: rise 0.9s ease both;
+}
+
+.discovery-reveal {
+  animation: discovery-reveal 0.8s ease both;
+}
+
+@keyframes discovery-reveal {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes rise {
@@ -110,7 +121,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rise {
+  .rise, .discovery-reveal {
     animation: none;
   }
 }
@@ -135,4 +146,8 @@ input[type="range"]::-moz-range-thumb {
     transform: translateY(-70vh);
     opacity: 0;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mote { animation: none; }
 }

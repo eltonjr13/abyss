@@ -5,6 +5,7 @@ import { DURATIONS } from "../game/progress";
 import { cn } from "../utils/cn";
 import { useAuth } from "../auth/AuthContext";
 import { AccountCard } from "../components/AccountCard";
+import { ExpeditionGoal } from "../components/ExpeditionGoal";
 
 export function Setup() {
   const { state, startSession, canDive, syncMessage } = useGame();
@@ -25,6 +26,7 @@ export function Setup() {
       <div className="rise w-full max-w-sm text-center">
         <p className="font-pixel text-[10px] tracking-[0.4em] text-white/50">MERGULHE</p>
         <h1 className="mt-4 font-serif text-3xl text-[var(--foam)] italic">{biome.name}</h1>
+        <ExpeditionGoal />
         {loading || busy || !user || !verified ? (
           <>
             <p className="mt-4 text-sm leading-relaxed text-white/65">Conecte sua conta antes de mergulhar. Assim, suas sessões e descobertas ficam associadas a você.</p>

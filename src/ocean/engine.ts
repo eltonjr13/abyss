@@ -15,6 +15,7 @@ export interface OceanConfig {
   intensity: number;
   discovered: readonly string[];
   showCreatures?: boolean;
+  highlightedSpecies?: string | null;
 }
 
 interface Fish {
@@ -199,6 +200,10 @@ export class OceanEngine {
     this.config = next;
     if (biomeChanged || lifeChanged || todChanged || creaturesChanged || discoveriesChanged) this.rebuild();
     else if (!this.bgCanvas) this.composeBackground();
+    if (next.highlightedSpecies) {
+      const featured = this.fish.find(f => f.speciesId === next.highlightedSpecies);
+      if (featured) { featured.x = W / 2; featured.y = featured.baseY; }
+    }
     if (biomeChanged || todChanged) void this.ensureBiomeImages();
   }
 
@@ -650,6 +655,11 @@ export class OceanEngine {
       const height = spr.height * f.scale / 2;
       b.save();
       b.globalAlpha = 0.4 + f.z * 0.6;
+      if (f.speciesId === this.config.highlightedSpecies) {
+        b.globalAlpha = 1;
+        b.shadowColor = "#e8c88a";
+        b.shadowBlur = 6;
+      }
       b.translate(Math.round(f.x), Math.round(f.y));
       b.rotate(pose.tilt);
       b.scale(f.vx < 0 ? -1 : 1, 1);

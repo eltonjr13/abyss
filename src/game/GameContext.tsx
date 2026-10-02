@@ -21,6 +21,7 @@ import { extensionChrome } from "../platform/chrome";
 import { useSharedFocus } from "../focus/useSharedFocus";
 import { isActive, type FocusCommand, type FocusSnapshot } from "../focus/shared";
 import { canStartDive } from "../focus/access";
+import { SPECIES_BY_ID } from "../data/species";
 
 interface GameContextValue {
   state: GameState;
@@ -33,6 +34,10 @@ interface GameContextValue {
   syncMessage: string | null;
   selectedSpecies: string | null;
   setSelectedSpecies: (id: string | null) => void;
+  setTargetSpecies: (id: string | null) => void;
+  highlightedSpecies: string | null;
+  showSpeciesInOcean: (id: string) => void;
+  clearHighlight: () => void;
   finishOnboarding: () => void;
   selectBiome: (id: BiomeId) => void;
   startSession: (seconds: number | null) => void;
@@ -59,6 +64,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     session ? "focus" : state.seenOnboarding ? "home" : "onboarding",
   );
   const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null);
+  const [highlightedSpecies, setHighlightedSpecies] = useState<string | null>(null);
   const announcedRewards = useRef(new Set(data.appliedSharedSessions ?? []));
   const syncedAccount = useRef<string | null>(null);
   const acceptShared = useCallback((snapshot: FocusSnapshot) => {
@@ -92,6 +98,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     syncedAccount.current = null;
     dispatch({ type: "account", accountId: user?.id ?? null, snapshot });
     setSelectedSpecies(null);
+    setHighlightedSpecies(null);
     setView(snapshot.state.seenOnboarding ? "home" : "onboarding");
   }, [user?.id, authLoading]);
 
@@ -145,6 +152,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
       .then(() => { if (currentData.current.accountId === user.id) void getAudio().start(state.currentBiome); }).catch(() => undefined);
   }, [state.currentBiome, canDive, user, shared.connection]);
 
+  const setTargetSpecies = useCallback((id: string | null) => dispatch({ type: "target", id }), []);
+  const clearHighlight = useCallback(() => setHighlightedSpecies(null), []);
+  const showSpeciesInOcean = useCallback((id: string) => {
+    const species = SPECIES_BY_ID[id];
+    if (!species || !state.discovered.includes(id) || !state.unlockedBiomes.includes(species.biome)) return;
+    selectBiome(species.biome);
+    setHighlightedSpecies(id);
+    setSelectedSpecies(null);
+    setView("home");
+  }, [state.discovered, state.unlockedBiomes, selectBiome]);
+
   const sharedCommand = useCallback((command: FocusCommand) => {
     const connection = shared.connection.current;
     if (!user || !verified || authBusy || currentData.current.accountId !== user.id ||
@@ -177,6 +195,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const resetSave = useCallback(() => {
     dispatch({ type: "reset", now: Date.now() });
     setView("home");
+    setSelectedSpecies(null);
+    setHighlightedSpecies(null);
   }, []);
 
   const importState = useCallback((incoming: GameState) => {
@@ -206,6 +226,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
       syncMessage,
       selectedSpecies,
       setSelectedSpecies,
+      setTargetSpecies,
+      highlightedSpecies,
+      showSpeciesInOcean,
+      clearHighlight,
       finishOnboarding,
       selectBiome,
       startSession,
@@ -228,6 +252,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
       canDive,
       syncMessage,
       selectedSpecies,
+      setTargetSpecies,
+      highlightedSpecies,
+      showSpeciesInOcean,
+      clearHighlight,
       finishOnboarding,
       selectBiome,
       startSession,

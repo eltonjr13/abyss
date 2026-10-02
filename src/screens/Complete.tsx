@@ -5,9 +5,11 @@ import { levelTitle } from "../data/levels";
 import { useGame } from "../game/GameContext";
 import { formatHours } from "../lib/format";
 import { DiscoveryCard } from "../components/DiscoveryCard";
+import { COLLECTION_ACHIEVEMENTS, trackedSpecies } from "../game/collection";
+import { CollectionProgress } from "../components/CollectionProgress";
 
 export function Complete() {
-  const { rewards, setView, state } = useGame();
+  const { rewards, setView, state, showSpeciesInOcean } = useGame();
   const [idx, setIdx] = useState(0);
 
   if (!rewards) {
@@ -24,11 +26,12 @@ export function Complete() {
   if (idx < pending.length) {
     const spec = SPECIES_BY_ID[pending[idx]!];
     if (spec) {
-      return <DiscoveryCard species={spec} onClose={() => setIdx((i) => i + 1)} />;
+      return <DiscoveryCard key={spec.id} species={spec} guaranteed={rewards.guaranteedSpecies.includes(spec.id)} onClose={() => setIdx((i) => i + 1)} onViewOcean={() => showSpeciesInOcean(spec.id)} />;
     }
   }
 
   const biome = BIOMES[rewards.biome];
+  const goal = trackedSpecies(state);
 
   return (
     <div className="relative z-20 flex min-h-dvh flex-col items-center justify-center px-6 pb-[max(96px,env(safe-area-inset-bottom))] pt-[max(28px,env(safe-area-inset-top))]">
@@ -81,16 +84,31 @@ export function Complete() {
           </p>
         )}
 
+        {rewards.newSpecies.length > 0 && <p className="mt-5 text-sm text-[var(--gold)]">{rewards.newSpecies.length} nova{rewards.newSpecies.length > 1 ? "s" : ""} descoberta{rewards.newSpecies.length > 1 ? "s" : ""} na sua coleção</p>}
+        {rewards.newAchievements.map(id => <div key={id} role="status" className="mt-4 rounded-xl border border-[var(--gold)]/40 bg-[var(--gold)]/10 p-4">
+          <p className="text-[10px] tracking-[0.15em] text-[var(--gold)] uppercase">✦ Conquista desbloqueada</p>
+          <p className="mt-2 font-serif text-2xl italic">{COLLECTION_ACHIEVEMENTS.find(a => a.id === id)?.name}</p>
+        </div>)}
+        {goal && <section className="mt-5 rounded-xl border border-white/15 bg-[#071018]/70 p-4">
+          <p className="text-xs text-[var(--gold)]">Em busca de {goal.name}</p>
+          {(rewards.researchGains[goal.id] ?? 0) > 0 && <p className="mt-2 text-xs text-white/65">+{Math.round(rewards.researchGains[goal.id]! / 60 * 10) / 10} min de pesquisa neste mergulho</p>}
+          <CollectionProgress state={state} species={goal} />
+        </section>}
+
         <p className="mt-8 text-[11px] text-white/35">
           Sequência de {state.streak} dia{state.streak === 1 ? "" : "s"}
         </p>
 
         <button
-          onClick={() => setView("home")}
+          onClick={() => {
+            const last = rewards.newSpecies[rewards.newSpecies.length - 1];
+            if (last) showSpeciesInOcean(last); else setView("home");
+          }}
           className="mt-8 min-h-12 w-full border border-white/25 py-4 text-[12px] tracking-[0.28em] text-[var(--foam)] uppercase hover:border-white/50 sm:tracking-[0.38em]"
         >
           Ver o oceano
         </button>
+        <button onClick={() => setView("discoveries")} className="mt-3 min-h-11 w-full text-xs text-white/65">Ver coleção e conquistas</button>
       </div>
     </div>
   );

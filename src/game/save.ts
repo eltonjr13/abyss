@@ -1,5 +1,6 @@
 import { BIOME_ORDER } from "../data/biomes";
 import { SPECIES } from "../data/species";
+import { researchRequired } from "./collection";
 import { clamp, shiftDateKey, todayKey } from "../lib/format";
 import type { ActiveSession, BiomeId, GameState, PlusEntitlement, PlusFeatureId } from "../types";
 
@@ -37,6 +38,8 @@ export const INITIAL: GameState = {
   history: [],
   audio: { music: 0.42, ambient: 0.5, sfx: 0.38 },
   pity: {},
+  targetSpecies: null,
+  researchSeconds: {},
   plus: { ...DEFAULT_PLUS },
 };
 
@@ -50,6 +53,7 @@ export function freshState(now = Date.now()): GameState {
     history: [],
     audio: { ...INITIAL.audio },
     pity: {},
+    researchSeconds: {},
     plus: { ...DEFAULT_PLUS },
   };
 }
@@ -122,6 +126,12 @@ export function hydrate(raw: unknown, now = Date.now()): GameState {
   const currentBiome = biomeId(source.currentBiome) && unlockedBiomes.includes(source.currentBiome)
     ? source.currentBiome
     : "reef";
+  const research = record(source.researchSeconds);
+  const researchSeconds: Record<string, number> = {};
+  for (const species of SPECIES) {
+    const seconds = Math.min(researchRequired(species), whole(research[species.id]));
+    if (seconds > 0) researchSeconds[species.id] = seconds;
+  }
   const state: GameState = {
     ...initial,
     seenOnboarding: source.seenOnboarding === true,
@@ -143,6 +153,9 @@ export function hydrate(raw: unknown, now = Date.now()): GameState {
       sfx: clamp(nonNegative(audio.sfx, initial.audio.sfx), 0, 1),
     },
     pity: safePity,
+    targetSpecies: typeof source.targetSpecies === "string" && speciesIds.has(source.targetSpecies) && !discovered.includes(source.targetSpecies)
+      ? source.targetSpecies : null,
+    researchSeconds,
     plus: hydratePlus(source.plus, now),
   };
   return refreshDay(state, todayKey(new Date(now)));

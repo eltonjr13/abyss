@@ -6,9 +6,13 @@ import { overallLife } from "../game/save";
 import { formatHours } from "../lib/format";
 import { habitatRestoration } from "../ocean/restoration";
 import { useAuth } from "../auth/AuthContext";
+import { ExpeditionGoal } from "../components/ExpeditionGoal";
+import { PixelCreature } from "../components/PixelCreature";
+import { SPECIES_BY_ID } from "../data/species";
 
 export function Home() {
-  const { state, setView } = useGame();
+  const { state, setView, highlightedSpecies, clearHighlight } = useGame();
+  const highlighted = highlightedSpecies ? SPECIES_BY_ID[highlightedSpecies] : null;
   const { user } = useAuth();
   const biome = BIOMES[state.currentBiome];
   const life = state.biomeLife[state.currentBiome] ?? 0;
@@ -29,6 +33,13 @@ export function Home() {
 
       <div className="pointer-events-none flex-1" />
 
+      {highlighted && highlighted.biome === state.currentBiome && <section aria-label="Espécie em destaque no oceano" className="rise my-4 w-full max-w-sm rounded-xl border border-[var(--gold)]/40 bg-[#071018]/80 p-4 text-center backdrop-blur-sm">
+        <p className="text-[10px] tracking-[0.15em] text-[var(--gold)] uppercase">Agora vive no seu oceano</p>
+        <div className="mt-3"><PixelCreature species={highlighted} scale={5} /></div>
+        <p className="mt-2 font-serif text-2xl italic">{highlighted.name}</p>
+        <button onClick={clearHighlight} className="mt-2 min-h-11 px-5 text-xs text-white/65">Continuar explorando</button>
+      </section>}
+
       <div className="rise w-full max-w-sm text-center">
         <p className="text-[11px] tracking-[0.32em] text-white/50 uppercase">{biome.name}</p>
         <div className="mx-auto mt-4 h-[6px] w-40 overflow-hidden bg-white/10">
@@ -41,6 +52,7 @@ export function Home() {
           Vida {Math.round(life)}%
         </p>
         <p className="mt-2 font-serif text-sm text-white/45 italic">{habitatRestoration(state.currentBiome, life).label}</p>
+        <ExpeditionGoal compact />
 
         <button
           onClick={() => setView("setup")}

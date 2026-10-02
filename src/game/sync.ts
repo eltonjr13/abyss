@@ -2,6 +2,7 @@ import type { GameState, PlusEntitlement } from "../types";
 import { BIOME_ORDER } from "../data/biomes";
 import { SPECIES } from "../data/species";
 import { clamp } from "../lib/format";
+import { hydrate } from "./save";
 
 export interface SyncPayload {
   version: 2;
@@ -55,6 +56,9 @@ export function parseSavePayload(text: string): GameState | null {
  * Nenhum progresso, XP ou espécie descoberta é perdido.
  */
 export function mergeGameStates(local: GameState, remote: GameState): GameState {
+  // Old exports and malformed collection fields get the same validation as local saves.
+  const localCollection = hydrate(local);
+  const remoteCollection = hydrate(remote);
   const speciesSet = new Set(SPECIES.map((s) => s.id));
 
   // União das espécies descobertas
@@ -132,5 +136,8 @@ export function mergeGameStates(local: GameState, remote: GameState): GameState 
     discovered,
     history,
     plus,
+    researchSeconds: Object.fromEntries(SPECIES.map(s => [s.id,
+      Math.max(localCollection.researchSeconds[s.id] ?? 0, remoteCollection.researchSeconds[s.id] ?? 0)])),
+    targetSpecies: [localCollection.targetSpecies, remoteCollection.targetSpecies].find(id => id && !discovered.includes(id)) ?? null,
   };
 }

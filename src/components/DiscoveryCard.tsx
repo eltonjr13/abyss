@@ -1,51 +1,39 @@
+import { useState } from "react";
 import { BIOMES } from "../data/biomes";
+import { RARITIES } from "../game/collection";
 import type { Species } from "../types";
 import { PixelCreature } from "./PixelCreature";
+import { CollectionDialog } from "./CollectionDialog";
 
-const RARITY: Record<Species["rarity"], { label: string; color: string }> = {
-  comum: { label: "Comum", color: "#8aa8a8" },
-  incomum: { label: "Incomum", color: "#7ec8a0" },
-  rara: { label: "Rara", color: "#d4b06a" },
-  lendaria: { label: "Lendária", color: "#d080b0" },
-};
-
-export function DiscoveryCard({
-  species,
-  onClose,
-  fresh = true,
-}: {
+export function DiscoveryCard({ species, onClose, onViewOcean, fresh = true, guaranteed = false }: {
   species: Species;
   onClose: () => void;
+  onViewOcean?: () => void;
   fresh?: boolean;
+  guaranteed?: boolean;
 }) {
-  const r = RARITY[species.rarity];
-  const biome = BIOMES[species.biome];
+  const [revealed, setRevealed] = useState(!fresh);
+  const rarity = RARITIES[species.rarity];
+  const legendary = species.rarity === "lendaria";
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#03080c]/70 px-4 py-5 backdrop-blur-[2px]">
-      <div role="dialog" aria-modal="true" aria-label={species.name} className="rise my-auto max-h-[calc(100dvh-40px)] w-full max-w-sm overflow-y-auto border border-white/10 bg-[#0b1620]/90 p-5 text-center shadow-2xl sm:p-8">
-        <p className="font-pixel text-[10px] tracking-[0.35em] text-[var(--gold)] uppercase">
-          {fresh ? "Nova descoberta" : "Espécie"}
-        </p>
-        <div className="mt-6 mb-4">
-          <PixelCreature species={species} scale={7} />
-        </div>
-        <h2 className="font-serif text-3xl text-[var(--foam)] italic">{species.name}</h2>
-        <p className="mt-1 text-[11px] tracking-wide text-white/40">{species.scientific}</p>
-        <p className="mt-5 font-serif text-[17px] leading-relaxed text-white/75 italic">
-          “{species.blurb}”
-        </p>
-        <div className="mt-6 flex items-center justify-center gap-3 text-[10px] tracking-[0.2em] uppercase">
-          <span style={{ color: r.color }}>{r.label}</span>
-          <span className="text-white/25">·</span>
-          <span className="text-white/50">{biome.short}</span>
-        </div>
-        <button
-          onClick={onClose}
-          className="mt-8 min-h-12 w-full border border-white/15 py-3 text-[11px] tracking-[0.28em] text-white/80 uppercase hover:border-white/40 hover:text-white"
-        >
-          Continuar
-        </button>
+    <CollectionDialog title={revealed ? species.name : "Nova descoberta por revelar"} onClose={onClose}>
+      <p className="font-pixel text-[10px] tracking-[0.25em] text-[var(--gold)] uppercase">{fresh ? revealed ? legendary ? "Um encontro lendário" : "Nova descoberta" : "Algo voltou ao seu oceano" : "Sua coleção"}</p>
+      <div className={`my-6 flex min-h-32 items-center justify-center rounded-full ${revealed ? "discovery-reveal" : "opacity-60"}`} style={revealed ? { background: `radial-gradient(ellipse, ${rarity.color}25, transparent 70%)` } : undefined}>
+        <PixelCreature species={species} scale={7} silhouette={!revealed} />
       </div>
-    </div>
+      <div aria-live="polite">
+        <h2 className="font-serif text-3xl text-[var(--foam)] italic">{revealed ? species.name : "Uma nova presença"}</h2>
+        {revealed ? <>
+          <p className="mt-1 text-[11px] text-white/50">{species.scientific}</p>
+          <p className="mt-4 font-serif text-lg leading-relaxed text-white/75 italic">“{species.blurb}”</p>
+          <div className="mt-5 flex items-center justify-center gap-3 text-[10px] tracking-[0.15em] uppercase"><span style={{ color: rarity.color }}>{rarity.label}</span><span className="text-white/30">·</span><span className="text-white/65">{BIOMES[species.biome].short}</span></div>
+          {fresh && <p className="mt-4 text-xs text-white/65">{guaranteed ? "Pesquisa concluída. Seu encontro está garantido." : "Um encontro inesperado durante seu mergulho."} Esta espécie agora habita seu oceano.</p>}
+        </> : <p className="mt-4 font-serif text-lg text-white/65 italic">Seu foco abriu espaço para uma nova vida. Descubra quem chegou.</p>}
+      </div>
+      {!revealed ? <button onClick={() => setRevealed(true)} className="mt-6 min-h-12 w-full rounded-lg border border-[var(--gold)]/60 py-3 text-xs text-[var(--foam)]">Revelar descoberta</button> : <>
+        {onViewOcean && <button onClick={onViewOcean} className="mt-6 min-h-12 w-full rounded-lg border border-[var(--gold)]/60 py-3 text-xs text-[var(--foam)]">Ver no meu oceano</button>}
+        <button onClick={onClose} className="mt-3 min-h-11 w-full rounded-lg border border-white/15 py-3 text-xs text-white/75">{fresh ? "Continuar" : "Voltar à coleção"}</button>
+      </>}
+    </CollectionDialog>
   );
 }
