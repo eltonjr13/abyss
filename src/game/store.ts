@@ -81,7 +81,7 @@ export function gameReducer(data: GameData, action: GameAction): GameData {
       }
       const row = action.snapshot.row;
       const session = isActive(row) && row.user_id === action.userId ? sessionFromRow(row, action.snapshot.offset) : null;
-      return { state: refreshDay(state, todayKey(new Date(action.now))), session, rewards, appliedSharedSessions: [...applied] };
+      return { ...data, state: refreshDay(state, todayKey(new Date(action.now))), session, rewards, appliedSharedSessions: [...applied] };
     }
     case "onboarding":
       return { ...data, state: { ...data.state, seenOnboarding: true } };

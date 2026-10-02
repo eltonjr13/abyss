@@ -63,6 +63,21 @@ test("a legacy guest timer stays preserved without resuming or awarding anonymou
   assert.equal(loadSnapshot(now, "alice").state.sessionsCompleted, 0);
 });
 
+test("repeated account synchronization keeps its owner and the dive ready", () => {
+  const now = Date.now();
+  let data = gameReducer(initialGameData(), { type: "account", accountId: "alice",
+    snapshot: { state: freshState(now), session: null } });
+  const snapshot: FocusSnapshot = { connected: true, busy: false, offset: 0, error: null,
+    row: null, completed: [] };
+  for (let refresh = 0; refresh < 3; refresh++) {
+    data = gameReducer(data, { type: "shared", userId: "alice", snapshot, now });
+    assert.equal(data.accountId, "alice", "synchronization must not restart the account loading gate");
+    assert.equal(canStartDive({ userId: "alice", accountId: data.accountId ?? null,
+      verified: true, authLoading: false, authBusy: false, connected: true, syncBusy: false }), true);
+    assert.equal(gameReducer(data, { type: "shared", userId: "bob", snapshot, now }), data);
+  }
+});
+
 test("a history response from another account never becomes a connected, rewardable snapshot", async () => {
   const query = {
     select: () => query, eq: () => query, order: () => query,
@@ -92,6 +107,7 @@ test("confirmed history restores the same discoveries on a new device and never 
   const action = { type: "shared" as const, userId: "alice", now: now + 6000000,
     snapshot: { row: null, connected: true, busy: false, offset: 0, error: null, completed: rows } };
   const firstDevice = gameReducer(seed, action);
+  assert.equal(firstDevice.accountId, "alice");
   const secondDevice = gameReducer(seed, { ...action, snapshot: { ...action.snapshot, completed: [...rows].reverse() } });
   assert.deepEqual(firstDevice.state, secondDevice.state);
   assert.ok(firstDevice.state.discovered.length > 0);
